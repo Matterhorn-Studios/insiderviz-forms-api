@@ -4,6 +4,7 @@ import (
 	"gin/config"
 	"gin/utils"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -93,5 +94,13 @@ func main() {
 	// turn on DB
 	config.ConnectDB()
 
-	r.Run()
+	port := os.Getenv("PORT")
+
+	// check if port is empty
+	if port == "" {
+		port = "8080"
+	}
+
+	// run on port
+	r.Run(":" + port)
 }
