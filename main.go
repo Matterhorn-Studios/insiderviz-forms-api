@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
 	"gin/config"
+	"gin/structs"
 	"gin/utils"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -20,10 +24,75 @@ func setupRouter() *gin.Engine {
 		c.String(http.StatusOK, "pong")
 	})
 
+	r.Use(authCheck())
+
+	r.GET("/search", func(c *gin.Context) {
+		// get the query
+		query := c.Query("query")
+
+		// setup the filter
+		searchFilter := bson.D{{Key: "$search", Value: bson.D{
+			{Key: "index", Value: "issuer_name"},
+			{Key: "text", Value: bson.D{
+				{Key: "query", Value: query},
+				{Key: "path", Value: bson.A{"name", "cik", "ein", "tickers"}},
+				{Key: "fuzzy", Value: bson.D{}},
+			}},
+		}}}
+
+		limitFilter := bson.D{{Key: "$limit", Value: 10}}
+
+		cursor, err := config.GetCollection(config.DB, "Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter})
+		if err != nil {
+			panic(err)
+		}
+
+		var issuers []structs.DB_Issuer_Doc
+		if err = cursor.All(context.TODO(), &issuers); err != nil {
+			panic(err)
+		}
+
+		c.JSON(http.StatusOK, issuers)
+	})
+
 	// get the top 50 DeltaForms from the last month
 	r.GET("/delta", func(c *gin.Context) {
-		filter := bson.D{{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: "2022-06-15"}}}}
-		opts := options.Find().SetLimit(50).SetSort(bson.D{{Key: "netTotal", Value: -1}})
+		// get the params
+		buySellOrBoth := c.Query("buySellOrBoth")
+		insiderCongressOrBoth := c.Query("insiderCongressOrBoth")
+
+		var filterOne bson.E = bson.E{}
+		if buySellOrBoth == "Buy" {
+			filterOne = bson.E{Key: "buyOrSell", Value: "Buy"}
+		} else if buySellOrBoth == "Sell" {
+			filterOne = bson.E{Key: "buyOrSell", Value: "Sell"}
+		}
+
+		var filterTwo bson.E = bson.E{}
+		if insiderCongressOrBoth == "Insider" {
+			filterTwo = bson.E{Key: "formClass", Value: "Insider"}
+		} else if insiderCongressOrBoth == "Congress" {
+			filterTwo = bson.E{Key: "formClass", Value: "Congress"}
+		}
+
+		// offset and limit
+		offset := c.Query("offset")
+		limit := c.Query("limit")
+
+		// parse the offset and limit
+		var offsetInt int64 = 0
+		var limitInt int64 = 50
+
+		if offset != "" {
+			offsetInt, _ = strconv.ParseInt(offset, 10, 64)
+		}
+
+		if limit != "" {
+			limitInt, _ = strconv.ParseInt(limit, 10, 64)
+		}
+
+		filter := bson.D{{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: "2022-06-15"}}}, filterOne, filterTwo}
+		opts := options.Find().SetLimit(limitInt).SetSkip(offsetInt).SetSort(bson.D{{Key: "netTotal", Value: -1}})
 
 		deltaForms, err := utils.DeltaFormFetch(filter, opts)
 
@@ -37,8 +106,42 @@ func setupRouter() *gin.Engine {
 
 	// get the 50 most recent forms
 	r.GET("/recent", func(c *gin.Context) {
-		filter := bson.D{}
-		opts := options.Find().SetLimit(25).SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
+		// get the params
+		buySellOrBoth := c.Query("buySellOrBoth")
+		insiderCongressOrBoth := c.Query("insiderCongressOrBoth")
+
+		var filterOne bson.E = bson.E{}
+		if buySellOrBoth == "Buy" {
+			filterOne = bson.E{Key: "buyOrSell", Value: "Buy"}
+		} else if buySellOrBoth == "Sell" {
+			filterOne = bson.E{Key: "buyOrSell", Value: "Sell"}
+		}
+
+		var filterTwo bson.E = bson.E{}
+		if insiderCongressOrBoth == "Insider" {
+			filterTwo = bson.E{Key: "formClass", Value: "Insider"}
+		} else if insiderCongressOrBoth == "Congress" {
+			filterTwo = bson.E{Key: "formClass", Value: "Congress"}
+		}
+
+		// offset and limit
+		offset := c.Query("offset")
+		limit := c.Query("limit")
+
+		// parse the offset and limit
+		var offsetInt int64 = 0
+		var limitInt int64 = 50
+
+		if offset != "" {
+			offsetInt, _ = strconv.ParseInt(offset, 10, 64)
+		}
+
+		if limit != "" {
+			limitInt, _ = strconv.ParseInt(limit, 10, 64)
+		}
+
+		filter := bson.D{filterOne, filterTwo}
+		opts := options.Find().SetLimit(limitInt).SetSkip(offsetInt).SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
 
 		deltaForms, err := utils.DeltaFormFetch(filter, opts)
 
@@ -86,6 +189,22 @@ func setupRouter() *gin.Engine {
 	})
 
 	return r
+}
+
+func authCheck() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		// check the header
+		sentAuth := c.GetHeader("Authorization")
+		realAuth := os.Getenv("AUTH_TOKEN")
+
+		if sentAuth != realAuth {
+			c.AbortWithStatus(http.StatusUnauthorized)
+		}
+
+		c.Next()
+
+	}
 }
 
 func main() {
