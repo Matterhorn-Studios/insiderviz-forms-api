@@ -55,6 +55,73 @@ func setupRouter() *gin.Engine {
 		c.JSON(http.StatusOK, issuers)
 	})
 
+	r.GET("/dailySentiment", func(c *gin.Context) {
+		// setup the aggregate pipeline
+		matchStage := bson.D{
+			{Key: "$match", Value: bson.D{
+				{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: "2022-01-01"}}},
+			}},
+		}
+
+		projectStage := bson.D{
+			{Key: "$project", Value: bson.D{
+				{
+					Key: "SumSells", Value: bson.D{
+						{Key: "$cond", Value: bson.A{
+							bson.D{{
+								Key: "$eq", Value: bson.A{"$buyOrSell", "Sell"},
+							}},
+							"$netTotal", 0,
+						}},
+					},
+				},
+				{
+					Key: "SumBuys", Value: bson.D{
+						{Key: "$cond", Value: bson.A{
+							bson.D{{
+								Key: "$eq", Value: bson.A{"$buyOrSell", "Buy"},
+							}},
+							"$netTotal", 0,
+						}},
+					},
+				},
+				{
+					Key: "periodOfReport", Value: 1,
+				},
+			}},
+		}
+
+		groupStage := bson.D{
+			{Key: "$group", Value: bson.D{
+				{Key: "_id", Value: "$periodOfReport"},
+				{Key: "sellCount", Value: bson.D{
+					{Key: "$sum", Value: "$SumSells"},
+				}},
+				{Key: "buyCount", Value: bson.D{
+					{Key: "$sum", Value: "$SumBuys"},
+				}},
+			}},
+		}
+
+		orderState := bson.D{
+			{Key: "$sort", Value: bson.D{{Key: "_id", Value: -1}}},
+		}
+
+		// run the aggregate
+		cursor, err := config.GetCollection(config.DB, "DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState})
+		if err != nil {
+			panic(err)
+		}
+
+		// display the results
+		var results []bson.M
+		if err = cursor.All(context.TODO(), &results); err != nil {
+			panic(err)
+		}
+
+		c.JSON(http.StatusOK, results)
+	})
+
 	// get the top 50 DeltaForms from the last month
 	r.GET("/delta", func(c *gin.Context) {
 		// get the params
