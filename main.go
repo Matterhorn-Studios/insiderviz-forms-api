@@ -289,6 +289,7 @@ func setupRouter() *gin.Engine {
 	// get all the forms from one issuer
 	r.GET("/issuer/:cik", func(c *gin.Context) {
 		cik := c.Param("cik")
+		includeGraph := c.Query("includeGraph")
 
 		filter := bson.D{{Key: "issuer.issuerCik", Value: cik}}
 		opts := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
@@ -300,22 +301,32 @@ func setupRouter() *gin.Engine {
 			return
 		}
 
-		// get the issuer's information
-		issuerCollection := config.GetCollection(config.DB, "Issuer")
-		filter = bson.D{{Key: "cik", Value: cik}}
+		var issuer structs.DB_Issuer_Doc
+		if includeGraph == "true" {
+			issuer, err = utils.UpdateStockData(cik)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
+				return
+			}
+		} else {
+			// get the issuer's information
+			issuerCollection := config.GetCollection(config.DB, "Issuer")
+			filter = bson.D{{Key: "cik", Value: cik}}
+			opts := options.FindOne().SetProjection(bson.D{{Key: "stockData", Value: 0}})
 
-		issuerInfo := issuerCollection.FindOne(context.TODO(), filter)
+			// do not include the stockData
+			issuerInfo := issuerCollection.FindOne(context.TODO(), filter, opts)
 
-		if issuerInfo.Err() != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error1": issuerInfo.Err().Error()})
-			return
-		}
+			if issuerInfo.Err() != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error1": issuerInfo.Err().Error()})
+				return
+			}
 
-		// unmarshal the issuer info
-		var issuer bson.M
-		if err = issuerInfo.Decode(&issuer); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-			return
+			// unmarshal the issuer info
+			if err = issuerInfo.Decode(&issuer); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
+				return
+			}
 		}
 
 		c.JSON(http.StatusOK, gin.H{"forms": deltaForms, "info": issuer})
