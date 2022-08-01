@@ -264,7 +264,25 @@ func setupRouter() *gin.Engine {
 			return
 		}
 
-		c.JSON(http.StatusOK, deltaForms)
+		// get the reporter's information
+		reporterCollection := config.GetCollection(config.DB, "Reporter")
+		filter = bson.D{{Key: "cik", Value: cik}}
+
+		issuerInfo := reporterCollection.FindOne(context.TODO(), filter)
+
+		if issuerInfo.Err() != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error1": issuerInfo.Err().Error()})
+			return
+		}
+
+		// unmarshal the reporter info
+		var reporter bson.M
+		if err = issuerInfo.Decode(&reporter); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"forms": deltaForms, "info": reporter})
 
 	})
 
@@ -282,7 +300,25 @@ func setupRouter() *gin.Engine {
 			return
 		}
 
-		c.JSON(http.StatusOK, deltaForms)
+		// get the issuer's information
+		issuerCollection := config.GetCollection(config.DB, "Issuer")
+		filter = bson.D{{Key: "cik", Value: cik}}
+
+		issuerInfo := issuerCollection.FindOne(context.TODO(), filter)
+
+		if issuerInfo.Err() != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error1": issuerInfo.Err().Error()})
+			return
+		}
+
+		// unmarshal the issuer info
+		var issuer bson.M
+		if err = issuerInfo.Decode(&issuer); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"forms": deltaForms, "info": issuer})
 	})
 
 	// get the featured issuers
