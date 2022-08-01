@@ -16,7 +16,7 @@ type DB_Issuer_Doc struct {
 
 // D = date, C = close, V = volume
 type StockData struct {
-	D string  `json:"d" bson:"d"`
-	C float64 `json:"c" bson:"c"`
-	V int     `json:"v" bson:"v"`
+	Date   string  `json:"date" bson:"date"`
+	Close  float64 `json:"close" bson:"close"`
+	Volume int     `json:"volume" bson:"volume"`
 }

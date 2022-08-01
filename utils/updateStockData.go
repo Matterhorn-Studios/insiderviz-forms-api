@@ -67,9 +67,9 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 		// save it to the issuer
 		for _, day := range apiRes {
 			issuer.StockData = append(issuer.StockData, structs.StockData{
-				D: day.Date,
-				C: day.Close,
-				V: day.Volume,
+				Date:   day.Date,
+				Close:  day.Close,
+				Volume: day.Volume,
 			})
 		}
 
@@ -79,9 +79,9 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 		if err != nil {
 			return issuer, err
 		}
-	} else if len(issuer.Tickers) > 0 && issuer.StockData[0].D != today {
+	} else if len(issuer.Tickers) > 0 && issuer.StockData[0].Date != today {
 		// need to update the stock data
-		startDate := issuer.StockData[0].D
+		startDate := issuer.StockData[0].Date
 		url := "https://eodhistoricaldata.com/api/eod/" + issuer.Tickers[0] + "?fmt=json&api_token=6288e433919037.08587703&order=d&from=" + startDate
 
 		// create the http request
@@ -113,9 +113,9 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 		for _, day := range apiRes {
 			if day.Date != startDate {
 				temp := []structs.StockData{{
-					D: day.Date,
-					C: day.Close,
-					V: day.Volume,
+					Date:   day.Date,
+					Close:  day.Close,
+					Volume: day.Volume,
 				}}
 				issuer.StockData = append(temp, issuer.StockData...)
 			}
