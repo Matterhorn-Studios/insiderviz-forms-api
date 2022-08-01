@@ -56,10 +56,14 @@ func setupRouter() *gin.Engine {
 	})
 
 	r.GET("/dailySentiment", func(c *gin.Context) {
+
+		// get the start date from query
+		startDate := c.Query("startDate")
+
 		// setup the aggregate pipeline
 		matchStage := bson.D{
 			{Key: "$match", Value: bson.D{
-				{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: "2022-01-01"}}},
+				{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: startDate}}},
 			}},
 		}
 
@@ -86,6 +90,26 @@ func setupRouter() *gin.Engine {
 					},
 				},
 				{
+					Key: "CountSells", Value: bson.D{
+						{Key: "$cond", Value: bson.A{
+							bson.D{{
+								Key: "$eq", Value: bson.A{"$buyOrSell", "Sell"},
+							}},
+							1, 0,
+						}},
+					},
+				},
+				{
+					Key: "CountBuys", Value: bson.D{
+						{Key: "$cond", Value: bson.A{
+							bson.D{{
+								Key: "$eq", Value: bson.A{"$buyOrSell", "Buy"},
+							}},
+							1, 0,
+						}},
+					},
+				},
+				{
 					Key: "periodOfReport", Value: 1,
 				},
 			}},
@@ -94,11 +118,17 @@ func setupRouter() *gin.Engine {
 		groupStage := bson.D{
 			{Key: "$group", Value: bson.D{
 				{Key: "_id", Value: "$periodOfReport"},
-				{Key: "sellCount", Value: bson.D{
+				{Key: "sellAmount", Value: bson.D{
 					{Key: "$sum", Value: "$SumSells"},
 				}},
-				{Key: "buyCount", Value: bson.D{
+				{Key: "buyAmount", Value: bson.D{
 					{Key: "$sum", Value: "$SumBuys"},
+				}},
+				{Key: "sellCount", Value: bson.D{
+					{Key: "$sum", Value: "$CountSells"},
+				}},
+				{Key: "buyCount", Value: bson.D{
+					{Key: "$sum", Value: "$CountBuys"},
 				}},
 			}},
 		}
