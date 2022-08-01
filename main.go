@@ -285,6 +285,24 @@ func setupRouter() *gin.Engine {
 		c.JSON(http.StatusOK, deltaForms)
 	})
 
+	// get the featured issuers
+	r.GET("/featuredIssuers", func(c *gin.Context) {
+		var featuredIssuers []structs.DB_FeaturedIssuer
+		cursor, err := config.GetCollection(config.DB, "FeaturedIssuer").Find(context.TODO(), bson.D{{}})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
+			return
+		}
+
+		errParse := cursor.All(context.TODO(), &featuredIssuers)
+		if errParse != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error1": errParse.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, featuredIssuers)
+	})
+
 	return r
 }
 
