@@ -212,8 +212,16 @@ func setupRouter() *gin.Engine {
 				// decode into DB_Issuer_Doc
 				err := cursor.Decode(&reporter)
 				if err == nil {
-					c.JSON(http.StatusOK, reporter)
-					return
+					// check the reporter has forms
+					filter := bson.D{{Key: "reporters.reporterCik", Value: reporter.Cik}}
+					opts2 := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
+					deltaForms, err := utils.DeltaFormFetch(filter, opts2)
+					if err == nil {
+						if len(deltaForms) > 0 && deltaForms[0].PeriodOfReport > "2021-01-01" {
+							c.JSON(http.StatusOK, reporter)
+							return
+						}
+					}
 				}
 			}
 
