@@ -286,6 +286,20 @@ func setupRouter() *gin.Engine {
 
 	})
 
+	// get the stock data for one issuer
+	r.GET("/issuer/graph/:cik", func(c *gin.Context) {
+		cik := c.Param("cik")
+
+		// get the stock data
+		stockData, err := utils.UpdateStockData(cik)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, stockData)
+	})
+
 	// get all the forms from one issuer
 	r.GET("/issuer/:cik", func(c *gin.Context) {
 		cik := c.Param("cik")
