@@ -162,7 +162,7 @@ func setupRouter() *gin.Engine {
 		for {
 			// get a random offset 1-5000
 			offset := rand.Intn(5000) + 1
-			opts := options.FindOne().SetSkip(int64(offset))
+			opts := options.FindOne().SetSkip(int64(offset)).SetProjection(bson.D{{Key: "stockData", Value: 0}})
 
 			cursor := issuerCollection.FindOne(context.TODO(), bson.D{}, opts)
 			if cursor.Err() == nil {
