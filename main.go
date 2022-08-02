@@ -31,6 +31,11 @@ func setupRouter() *gin.Engine {
 		// get the query
 		query := c.Query("query")
 
+		if query == "" {
+			c.JSON(http.StatusOK, make([]string, 0))
+			return
+		}
+
 		projectStage := bson.D{
 			{Key: "$project", Value: bson.D{
 				{
