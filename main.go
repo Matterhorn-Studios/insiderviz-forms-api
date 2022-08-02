@@ -5,6 +5,7 @@ import (
 	"gin/config"
 	"gin/structs"
 	"gin/utils"
+	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -150,6 +151,56 @@ func setupRouter() *gin.Engine {
 		}
 
 		c.JSON(http.StatusOK, results)
+	})
+
+	// get random issuer
+	r.GET("/random/issuer", func(c *gin.Context) {
+		// get the issuer collection
+		issuerCollection := config.GetCollection(config.DB, "Issuer")
+		var issuer structs.DB_Issuer_Doc
+
+		for {
+			// get a random offset 1-5000
+			offset := rand.Intn(5000) + 1
+			opts := options.FindOne().SetSkip(int64(offset))
+
+			cursor := issuerCollection.FindOne(context.TODO(), bson.D{}, opts)
+			if cursor.Err() == nil {
+				// decode into DB_Issuer_Doc
+				err := cursor.Decode(&issuer)
+				if err == nil {
+					if len(issuer.Tickers) > 0 {
+						c.JSON(http.StatusOK, issuer)
+						return
+					}
+				}
+			}
+
+		}
+	})
+
+	// get random reporter
+	r.GET("/random/reporter", func(c *gin.Context) {
+		// get the reporter collection
+		reporterCollection := config.GetCollection(config.DB, "Reporter")
+		var reporter structs.DB_Reporter_Doc
+
+		for {
+			// get a random offset 1-5000
+			offset := rand.Intn(5000) + 1
+			opts := options.FindOne().SetSkip(int64(offset))
+
+			cursor := reporterCollection.FindOne(context.TODO(), bson.D{}, opts)
+			if cursor.Err() == nil {
+				// decode into DB_Issuer_Doc
+				err := cursor.Decode(&reporter)
+				if err == nil {
+					c.JSON(http.StatusOK, reporter)
+					return
+				}
+			}
+
+		}
 	})
 
 	// get the top 50 DeltaForms from the last month
