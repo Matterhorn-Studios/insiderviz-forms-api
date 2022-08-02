@@ -311,8 +311,7 @@ func setupRouter() *gin.Engine {
 		deltaForms, err := utils.DeltaFormFetch(filter, opts)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-			return
+			deltaForms = []structs.DB_DeltaForm{}
 		}
 
 		// get the reporter's information
@@ -362,8 +361,7 @@ func setupRouter() *gin.Engine {
 		deltaForms, err := utils.DeltaFormFetch(filter, opts)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-			return
+			deltaForms = []structs.DB_DeltaForm{}
 		}
 
 		var issuer structs.DB_Issuer_Doc
