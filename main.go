@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
-	"gin/config"
-	"gin/structs"
-	"gin/utils"
 	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/groups/delta"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/structs"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,6 +24,7 @@ func setupRouter() *gin.Engine {
 
 	// Ping test
 	r.GET("/ping", func(c *gin.Context) {
+		delta.Testing()
 		c.String(http.StatusOK, "pong")
 	})
 

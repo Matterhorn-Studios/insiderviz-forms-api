@@ -3,12 +3,12 @@ package utils
 import (
 	"context"
 	"encoding/json"
-	"gin/config"
-	"gin/structs"
 	"io/ioutil"
 	"net/http"
 	"time"
 
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/structs"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

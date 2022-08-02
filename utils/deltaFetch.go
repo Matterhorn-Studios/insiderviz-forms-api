@@ -2,9 +2,9 @@ package utils
 
 import (
 	"context"
-	"gin/config"
-	"gin/structs"
 
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/structs"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
