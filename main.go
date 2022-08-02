@@ -31,6 +31,23 @@ func setupRouter() *gin.Engine {
 		// get the query
 		query := c.Query("query")
 
+		projectStage := bson.D{
+			{Key: "$project", Value: bson.D{
+				{
+					Key: "cik", Value: 1,
+				},
+				{
+					Key: "name", Value: 1,
+				},
+				{
+					Key: "tickers", Value: 1,
+				},
+				{
+					Key: "ein", Value: 1,
+				},
+			}},
+		}
+
 		// setup the filter
 		searchFilter := bson.D{{Key: "$search", Value: bson.D{
 			{Key: "index", Value: "issuer_name"},
@@ -43,7 +60,7 @@ func setupRouter() *gin.Engine {
 
 		limitFilter := bson.D{{Key: "$limit", Value: 10}}
 
-		cursor, err := config.GetCollection(config.DB, "Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter})
+		cursor, err := config.GetCollection(config.DB, "Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, projectStage, limitFilter})
 		if err != nil {
 			panic(err)
 		}
