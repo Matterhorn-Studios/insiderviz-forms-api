@@ -46,7 +46,7 @@ func AddGroup(r *gin.Engine) {
 		// aggregate
 		a_g := v1.Group("/aggregate")
 		{
-			a_g.GET("/mostBought", aggregation.MostBought)
+			a_g.GET("/top", aggregation.Top)
 			a_g.GET("/featuredIssuers", aggregation.FeaturedIssuers)
 			a_g.GET("/dailySentiment", aggregation.DailySentiment)
 		}

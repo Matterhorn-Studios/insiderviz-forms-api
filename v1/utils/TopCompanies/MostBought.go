@@ -1,23 +1,22 @@
-package aggregation
+package top
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func MostBought(c *gin.Context) {
-	// get the start date from the query
-	startDate := c.Query("startDate")
+func MostBought(startDate string, formClass string) ([]bson.M, error) {
+
+	var results []bson.M
 
 	// setup the aggregate pipeline
 	matchStage := bson.D{
 		{Key: "$match", Value: bson.D{
 			{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: startDate}}},
+			{Key: "formClass", Value: bson.D{{Key: "$eq", Value: formClass}}},
 		}},
 	}
 
@@ -47,7 +46,7 @@ func MostBought(c *gin.Context) {
 	groupStage := bson.D{
 		{Key: "$group", Value: bson.D{
 			{Key: "_id", Value: "$issuer.issuerCik"},
-			{Key: "buyAmount", Value: bson.D{
+			{Key: "amount", Value: bson.D{
 				{Key: "$sum", Value: "$SumBuys"},
 			}},
 			{Key: "name", Value: bson.D{
@@ -58,7 +57,7 @@ func MostBought(c *gin.Context) {
 
 	// order
 	orderState := bson.D{
-		{Key: "$sort", Value: bson.D{{Key: "buyAmount", Value: -1}}},
+		{Key: "$sort", Value: bson.D{{Key: "amount", Value: -1}}},
 	}
 
 	// limit
@@ -67,14 +66,13 @@ func MostBought(c *gin.Context) {
 	// run the aggregate on delta form
 	cursor, err := config.GetCollection(config.DB, "DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState, limitStage})
 	if err != nil {
-		panic(err)
+		return results, err
 	}
 
 	// display the results
-	var results []bson.M
 	if err = cursor.All(context.TODO(), &results); err != nil {
-		panic(err)
+		return results, err
 	}
 
-	c.JSON(http.StatusOK, results)
+	return results, nil
 }
