@@ -7,7 +7,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func EnvMongoURI() string {
+func GetEnvVariable(key string) string {
 	if os.Getenv("GO_ENV") != "production" {
 		err := godotenv.Load()
 		if err != nil {
@@ -15,5 +15,5 @@ func EnvMongoURI() string {
 		}
 	}
 
-	return os.Getenv("MONGODB_URI")
+	return os.Getenv(key)
 }

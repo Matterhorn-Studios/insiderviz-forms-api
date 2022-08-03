@@ -3,12 +3,12 @@ package utils
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/structs"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -52,7 +52,7 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 		}
 
 		// convert response body to byte array
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return issuer, err
 		}
@@ -98,7 +98,7 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 		}
 
 		// convert response body to byte array
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		bodyBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return issuer, err
 		}
