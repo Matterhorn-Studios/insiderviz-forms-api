@@ -18,7 +18,6 @@ import (
 func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 	var issuer structs.DB_Issuer_Doc
 
-	fmt.Println("called")
 	// get the current issuer info
 	issuerCollection := config.GetCollection(config.DB, "Issuer")
 	filter := bson.D{{Key: "cik", Value: cik}}
@@ -39,6 +38,8 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 
 	// check the length of the stock data
 	if (len(issuer.StockData) == 0 && len(issuer.Tickers) > 0) || !issuer.StockDataSplit {
+
+		fmt.Println("called")
 		// fetch new data
 		url := "https://eodhistoricaldata.com/api/eod/" + issuer.Tickers[0] + "?fmt=json&api_token=6288e433919037.08587703&order=d&from=2016-01-01"
 
@@ -126,6 +127,13 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 					// apply the split
 					day.Close /= curSplit
 				}
+				temp := structs.StockData{
+					Date:   day.Date,
+					Close:  day.Close,
+					Volume: day.Volume,
+				}
+				issuer.StockData = append(issuer.StockData, temp)
+			} else {
 				temp := structs.StockData{
 					Date:   day.Date,
 					Close:  day.Close,
