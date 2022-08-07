@@ -12,6 +12,7 @@ type DB_Issuer_Doc struct {
 	StateOfIncorporation string      `json:"stateOfIncorporation" bson:"stateOfIncorporation"`
 	Phone                string      `json:"phone" bson:"phone"`
 	StockData            []StockData `json:"stockData" bson:"stockData"`
+	StockDataSplit       bool        `json:"stockDataSplit" bson:"stockDataSplit"`
 }
 
 // D = date, C = close, V = volume

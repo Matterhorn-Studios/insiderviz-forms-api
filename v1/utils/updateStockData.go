@@ -3,8 +3,11 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
@@ -15,6 +18,7 @@ import (
 func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 	var issuer structs.DB_Issuer_Doc
 
+	fmt.Println("called")
 	// get the current issuer info
 	issuerCollection := config.GetCollection(config.DB, "Issuer")
 	filter := bson.D{{Key: "cik", Value: cik}}
@@ -34,7 +38,7 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 	today := time.Now().Format("2006-01-02")
 
 	// check the length of the stock data
-	if len(issuer.StockData) == 0 && len(issuer.Tickers) > 0 {
+	if (len(issuer.StockData) == 0 && len(issuer.Tickers) > 0) || !issuer.StockDataSplit {
 		// fetch new data
 		url := "https://eodhistoricaldata.com/api/eod/" + issuer.Tickers[0] + "?fmt=json&api_token=6288e433919037.08587703&order=d&from=2016-01-01"
 
@@ -52,28 +56,87 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 		}
 
 		// convert response body to byte array
-		bodyBytes, err := io.ReadAll(resp.Body)
+		stockDataBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return issuer, err
+		}
+
+		// get the stock split data
+		url = "https://eodhistoricaldata.com/api/splits/" + issuer.Tickers[0] + "?fmt=json&api_token=6288e433919037.08587703&order=d&from=2016-01-01"
+
+		// create the http request
+		req, err = http.NewRequest("GET", url, nil)
+		if err != nil {
+			return issuer, err
+		}
+
+		// create the http client
+		resp, err = client.Do(req)
+		if err != nil || resp.StatusCode != 200 {
+			return issuer, err
+		}
+
+		// convert response body to byte array
+		stockSplitBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return issuer, err
 		}
 
 		// parse
 		var apiRes []stockDataAPIResponse
-		err = json.Unmarshal(bodyBytes, &apiRes)
+		err = json.Unmarshal(stockDataBytes, &apiRes)
 		if err != nil {
 			return issuer, err
 		}
 
-		// save it to the issuer
+		var apiSplitRes []stockSplitAPIResponse
+		err = json.Unmarshal(stockSplitBytes, &apiSplitRes)
+		if err != nil {
+			return issuer, err
+		}
+
+		// save current index for split
+		curSplitIndex := len(apiSplitRes) - 1
+		curSplit := 1.0
+		if curSplitIndex >= 0 {
+			splitStr := strings.Split(apiSplitRes[curSplitIndex].Split, "/")
+			top, _ := strconv.ParseFloat(splitStr[0], 64)
+			bot, _ := strconv.ParseFloat(splitStr[1], 64)
+			curSplit *= top / bot
+		}
+
+		issuer.StockData = make([]structs.StockData, 0)
+
 		for _, day := range apiRes {
-			issuer.StockData = append(issuer.StockData, structs.StockData{
-				Date:   day.Date,
-				Close:  day.Close,
-				Volume: day.Volume,
-			})
+			// check the split
+			// ensure there is a split left
+			if curSplitIndex >= 0 {
+				if apiSplitRes[curSplitIndex].Date >= day.Date {
+					// make sure it is the most recent
+					if curSplitIndex-1 >= 0 {
+						if apiSplitRes[curSplitIndex-1].Date >= day.Date {
+							curSplitIndex--
+							splitStr := strings.Split(apiSplitRes[curSplitIndex].Split, "/")
+							top, _ := strconv.ParseFloat(splitStr[0], 64)
+							bot, _ := strconv.ParseFloat(splitStr[1], 64)
+							curSplit *= top / bot
+						}
+					}
+
+					// apply the split
+					day.Close /= curSplit
+				}
+				temp := structs.StockData{
+					Date:   day.Date,
+					Close:  day.Close,
+					Volume: day.Volume,
+				}
+				issuer.StockData = append(issuer.StockData, temp)
+			}
 		}
 
 		// update the issuer
+		issuer.StockDataSplit = true
 		filter := bson.D{{Key: "cik", Value: cik}}
 		_, err = issuerCollection.UpdateOne(context.TODO(), filter, bson.D{{Key: "$set", Value: issuer}})
 		if err != nil {
@@ -98,28 +161,90 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 		}
 
 		// convert response body to byte array
-		bodyBytes, err := io.ReadAll(resp.Body)
+		stockDataBytes, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return issuer, err
+		}
+
+		// get the stock split data
+		url = "https://eodhistoricaldata.com/api/splits/" + issuer.Tickers[0] + "?fmt=json&api_token=6288e433919037.08587703&order=d&from=" + startDate
+
+		// create the http request
+		req, err = http.NewRequest("GET", url, nil)
+		if err != nil {
+			return issuer, err
+		}
+
+		// create the http client
+		resp, err = client.Do(req)
+		if err != nil || resp.StatusCode != 200 {
+			return issuer, err
+		}
+
+		// convert response body to byte array
+		stockSplitBytes, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return issuer, err
 		}
 
 		// parse
 		var apiRes []stockDataAPIResponse
-		err = json.Unmarshal(bodyBytes, &apiRes)
+		err = json.Unmarshal(stockDataBytes, &apiRes)
 		if err != nil {
 			return issuer, err
 		}
 
+		var apiSplitRes []stockSplitAPIResponse
+		err = json.Unmarshal(stockSplitBytes, &apiSplitRes)
+		if err != nil {
+			return issuer, err
+		}
+
+		// save current index for split
+		curSplitIndex := len(apiSplitRes) - 1
+		curSplit := 1.0
+		if curSplitIndex >= 0 {
+			splitStr := strings.Split(apiSplitRes[curSplitIndex].Split, "/")
+			top, _ := strconv.ParseFloat(splitStr[0], 64)
+			bot, _ := strconv.ParseFloat(splitStr[1], 64)
+
+			curSplit *= top / bot
+		}
+
+		addGroup := make([]structs.StockData, 0)
+
 		for _, day := range apiRes {
 			if day.Date != startDate {
-				temp := []structs.StockData{{
+				// check the split
+				// ensure there is a split left
+				if curSplitIndex >= 0 {
+					if apiSplitRes[curSplitIndex].Date >= day.Date {
+						// make sure it is the most recent
+						if curSplitIndex-1 >= 0 {
+							if apiSplitRes[curSplitIndex-1].Date >= day.Date {
+								curSplitIndex--
+								splitStr := strings.Split(apiSplitRes[curSplitIndex].Split, "/")
+								top, _ := strconv.ParseFloat(splitStr[0], 64)
+								bot, _ := strconv.ParseFloat(splitStr[1], 64)
+								curSplit *= top / bot
+							}
+						}
+
+						// apply the split
+						day.Close /= curSplit
+					}
+				}
+				temp := structs.StockData{
 					Date:   day.Date,
 					Close:  day.Close,
 					Volume: day.Volume,
-				}}
-				issuer.StockData = append(temp, issuer.StockData...)
+				}
+				addGroup = append(addGroup, temp)
 			}
 		}
+
+		// prepend to the issuer
+		issuer.StockData = append(addGroup, issuer.StockData...)
 
 		// update the issuer
 		filter := bson.D{{Key: "cik", Value: cik}}
@@ -132,6 +257,11 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 
 	return issuer, nil
 
+}
+
+type stockSplitAPIResponse struct {
+	Date  string `json:"date"`
+	Split string `json:"split"`
 }
 
 type stockDataAPIResponse struct {

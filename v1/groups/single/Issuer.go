@@ -2,6 +2,7 @@ package single
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"net/http"
 
@@ -28,6 +29,7 @@ func Issuer(c *gin.Context) {
 
 	var issuer structs.DB_Issuer_Doc
 	if includeGraph == "true" {
+		fmt.Println("hi")
 		issuer, err = utils.UpdateStockData(cik)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
