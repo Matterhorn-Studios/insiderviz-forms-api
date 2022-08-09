@@ -25,6 +25,7 @@ func AddGroup(r *gin.Engine) {
 		{
 			d_g.GET("/topThisMonth", delta.TopThisMonth)
 			d_g.GET("/recent", delta.Recent)
+			d_g.GET("/deepFilter", delta.DeepFilter)
 		}
 
 		// single
