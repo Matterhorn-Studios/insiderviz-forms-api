@@ -126,13 +126,27 @@ func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateS
 		buyOrSellFilter = bson.E{Key: "buyOrSell", Value: "Sell"}
 	}
 
+	netTotalFilter := bson.E{}
+	if netTotalMax < 100000000 {
+		netTotalFilter = bson.E{Key: "netTotal", Value: bson.M{"$gte": netTotalMin, "$lte": netTotalMax}}
+	}
+
+	sharesFilter := bson.E{}
+	if sharesMax < 100000000 {
+		sharesFilter = bson.E{Key: "sharesTraded", Value: bson.M{"$gte": sharesMin, "$lte": sharesMax}}
+	}
+
+	sharePriceFilter := bson.E{}
+	if sharePriceMax < 5000 {
+		sharePriceFilter = bson.E{Key: "averagePricePerShare", Value: bson.M{"$gte": sharePriceMin, "$lte": sharePriceMax}}
+	}
 	// setup the filter
 	filter := bson.D{
 		{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: dateStart}, {Key: "$lte", Value: dateEnd}}},
 		{Key: "formClass", Value: bson.D{{Key: "$in", Value: formClass}}},
-		{Key: "netTotal", Value: bson.D{{Key: "$gte", Value: netTotalMin}, {Key: "$lte", Value: netTotalMax}}},
-		{Key: "sharesTraded", Value: bson.D{{Key: "$gte", Value: sharesMin}, {Key: "$lte", Value: sharesMax}}},
-		{Key: "averagePricePerShare", Value: bson.D{{Key: "$gte", Value: sharePriceMin}, {Key: "$lte", Value: sharePriceMax}}},
+		sharePriceFilter,
+		netTotalFilter,
+		sharesFilter,
 		buyOrSellFilter,
 	}
 
