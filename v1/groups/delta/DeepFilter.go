@@ -15,6 +15,7 @@ import (
 // LIST OF PARAMS
 // sortBy: periodOfReport, netTotal, shares, sharePrice
 // formClass: Insider, Congress, Institution
+// buyOrSellOrBoth: Buy, Sell, Both
 // order: asc, desc
 // dateStart: YYYY-MM-DD
 // dateEnd: YYYY-MM-DD
@@ -45,6 +46,8 @@ func DeepFilter(c *gin.Context) {
 
 	dateStart := c.Query("dateStart")
 	dateEnd := c.Query("dateEnd")
+
+	buyOrSellOrBoth := c.Query("buyOrSellOrBoth")
 
 	netTotalMinQuery := c.Query("netTotalMin")
 	netTotalMin, err := strconv.ParseFloat(netTotalMinQuery, 64)
@@ -103,18 +106,26 @@ func DeepFilter(c *gin.Context) {
 	}
 
 	// call the function
-	forms, err := HandleDeepFilter(sortBy, order, dateStart, dateEnd, formClassArray, netTotalMin, netTotalMax, sharesMin, sharesMax, sharePriceMin, sharePriceMax, take, skip)
+	forms, err := HandleDeepFilter(sortBy, order, buyOrSellOrBoth, dateStart, dateEnd, formClassArray, netTotalMin, netTotalMax, sharesMin, sharesMax, sharePriceMin, sharePriceMax, take, skip)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"forms": forms})
+	c.JSON(http.StatusOK, forms)
 
 }
 
-func HandleDeepFilter(sortBy string, order string, dateStart string, dateEnd string, formClass []string, netTotalMin float64, netTotalMax float64, sharesMin float64, sharesMax float64, sharePriceMin float64, sharePriceMax float64, take int64, skip int64) ([]structs.DB_DeltaForm, error) {
+func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateStart string, dateEnd string, formClass []string, netTotalMin float64, netTotalMax float64, sharesMin float64, sharesMax float64, sharePriceMin float64, sharePriceMax float64, take int64, skip int64) ([]structs.DB_DeltaForm, error) {
+
+	buyOrSellFilter := bson.E{}
+	if buyOrSellOrBoth == "Buy" {
+		buyOrSellFilter = bson.E{Key: "buyOrSell", Value: "Buy"}
+	} else if buyOrSellOrBoth == "Sell" {
+		buyOrSellFilter = bson.E{Key: "buyOrSell", Value: "Sell"}
+	}
+
 	// setup the filter
 	filter := bson.D{
 		{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: dateStart}, {Key: "$lte", Value: dateEnd}}},
@@ -122,6 +133,7 @@ func HandleDeepFilter(sortBy string, order string, dateStart string, dateEnd str
 		{Key: "netTotal", Value: bson.D{{Key: "$gte", Value: netTotalMin}, {Key: "$lte", Value: netTotalMax}}},
 		{Key: "sharesTraded", Value: bson.D{{Key: "$gte", Value: sharesMin}, {Key: "$lte", Value: sharesMax}}},
 		{Key: "averagePricePerShare", Value: bson.D{{Key: "$gte", Value: sharePriceMin}, {Key: "$lte", Value: sharePriceMax}}},
+		buyOrSellFilter,
 	}
 
 	opts := options.Find().SetLimit(take).SetSkip(skip)
