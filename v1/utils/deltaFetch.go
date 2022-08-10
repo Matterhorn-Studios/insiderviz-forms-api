@@ -13,7 +13,7 @@ import (
 var deltaCollection *mongo.Collection = config.GetCollection(config.DB, "DeltaForm")
 
 func DeltaFormFetch(filter primitive.D, opts *options.FindOptions) ([]structs.DB_DeltaForm, error) {
-	var deltaForms []structs.DB_DeltaForm
+	deltaForms := make([]structs.DB_DeltaForm, 0)
 	data, errFetch := deltaCollection.Find(context.TODO(), filter, opts)
 	if errFetch != nil {
 		return nil, errFetch
