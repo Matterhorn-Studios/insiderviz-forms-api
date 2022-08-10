@@ -162,9 +162,9 @@ func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateS
 		opts.SetSort(bson.D{{Key: "periodOfReport", Value: queryOrder}})
 	case "netTotal":
 		opts.SetSort(bson.D{{Key: "netTotal", Value: queryOrder}})
-	case "sharesTraded":
+	case "shares":
 		opts.SetSort(bson.D{{Key: "sharesTraded", Value: queryOrder}})
-	case "averagePricePerShare":
+	case "sharePrice":
 		opts.SetSort(bson.D{{Key: "averagePricePerShare", Value: queryOrder}})
 	}
 
