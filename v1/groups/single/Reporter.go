@@ -16,7 +16,12 @@ import (
 func Reporter(c *gin.Context) {
 	cik := c.Param("cik")
 
-	filter := bson.D{{Key: "reporters.reporterCik", Value: cik}}
+	filter := bson.D{{Key: "reporters.reporterCik", Value: cik}, {
+		Key: "$or", Value: bson.A{
+			bson.D{{Key: "formClass", Value: "Insider"}},
+			bson.D{{Key: "formClass", Value: "Congress"}},
+		},
+	}}
 	opts := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
 
 	deltaForms, err := utils.DeltaFormFetch(filter, opts)

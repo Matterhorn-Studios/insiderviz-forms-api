@@ -18,7 +18,12 @@ func Issuer(c *gin.Context) {
 	cik := c.Param("cik")
 	includeGraph := c.Query("includeGraph")
 
-	filter := bson.D{{Key: "issuer.issuerCik", Value: cik}}
+	filter := bson.D{{Key: "issuer.issuerCik", Value: cik}, {
+		Key: "$or", Value: bson.A{
+			bson.D{{Key: "formClass", Value: "Insider"}},
+			bson.D{{Key: "formClass", Value: "Congress"}},
+		},
+	}}
 	opts := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
 
 	deltaForms, err := utils.DeltaFormFetch(filter, opts)
