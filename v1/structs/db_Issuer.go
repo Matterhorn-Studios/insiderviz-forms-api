@@ -13,6 +13,7 @@ type DB_Issuer_Doc struct {
 	Phone                string      `json:"phone" bson:"phone"`
 	StockData            []StockData `json:"stockData" bson:"stockData"`
 	StockDataSplit       bool        `json:"stockDataSplit" bson:"stockDataSplit"`
+	Splits               []Split     `json:"splits" bson:"splits"`
 }
 
 // D = date, C = close, V = volume
@@ -20,4 +21,9 @@ type StockData struct {
 	Date   string  `json:"date" bson:"date"`
 	Close  float64 `json:"close" bson:"close"`
 	Volume int     `json:"volume" bson:"volume"`
+}
+
+type Split struct {
+	Date  string `json:"date" bson:"date"`
+	Split string `json:"split" bson:"split"`
 }
