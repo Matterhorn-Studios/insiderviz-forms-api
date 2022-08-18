@@ -13,6 +13,32 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+func LatestThirteenF(c *gin.Context) {
+	cik := c.Param("cik")
+
+	thirteenFCollection := config.GetCollection(config.DB, "13F")
+
+	filter := bson.D{{Key: "cik", Value: cik}}
+	opts := options.FindOne().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
+
+	form := thirteenFCollection.FindOne(context.TODO(), filter, opts)
+
+	if form.Err() != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": form.Err().Error()})
+		return
+	} else {
+		var thirteenF structs.DB_Form13F_Base
+		err := form.Decode(&thirteenF)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else {
+			c.JSON(http.StatusOK, thirteenF)
+		}
+	}
+
+}
+
 func Reporter(c *gin.Context) {
 	cik := c.Param("cik")
 

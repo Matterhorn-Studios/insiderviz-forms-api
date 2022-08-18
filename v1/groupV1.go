@@ -36,6 +36,7 @@ func AddGroup(r *gin.Engine) {
 			s_g.GET("/issuer/graph/:cik", single.IssuerGraph)
 			s_g.GET("/reporter/:cik", single.Reporter)
 			s_g.GET("/reporter/random", single.RandomReporter)
+			s_g.GET("/reporter/holdings/:cik", single.LatestThirteenF)
 		}
 
 		// search
