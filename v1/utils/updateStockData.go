@@ -3,7 +3,6 @@ package utils
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -37,9 +36,8 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 	today := time.Now().Format("2006-01-02")
 
 	// check the length of the stock data
-	if (len(issuer.StockData) == 0 && len(issuer.Tickers) > 0) || !issuer.StockDataSplit {
+	if (len(issuer.StockData) == 0 && len(issuer.Tickers) > 0) || (!issuer.StockDataSplit && len(issuer.Tickers) > 0) {
 
-		fmt.Println("called")
 		// fetch new data
 		url := "https://eodhistoricaldata.com/api/eod/" + issuer.Tickers[0] + "?fmt=json&api_token=6288e433919037.08587703&order=d&from=2016-01-01"
 
