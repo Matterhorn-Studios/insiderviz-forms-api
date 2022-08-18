@@ -115,7 +115,7 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 				if apiSplitRes[curSplitIndex].Date > day.Date {
 					// make sure it is the most recent
 					if curSplitIndex-1 >= 0 {
-						if apiSplitRes[curSplitIndex-1].Date >= day.Date {
+						if apiSplitRes[curSplitIndex-1].Date > day.Date {
 							curSplitIndex--
 							splitStr := strings.Split(apiSplitRes[curSplitIndex].Split, "/")
 							top, _ := strconv.ParseFloat(splitStr[0], 64)
@@ -229,7 +229,7 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 					if apiSplitRes[curSplitIndex].Date > day.Date {
 						// make sure it is the most recent
 						if curSplitIndex-1 >= 0 {
-							if apiSplitRes[curSplitIndex-1].Date >= day.Date {
+							if apiSplitRes[curSplitIndex-1].Date > day.Date {
 								curSplitIndex--
 								splitStr := strings.Split(apiSplitRes[curSplitIndex].Split, "/")
 								top, _ := strconv.ParseFloat(splitStr[0], 64)
