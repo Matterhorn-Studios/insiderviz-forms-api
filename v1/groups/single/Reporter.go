@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/rand"
 	"net/http"
+	"sort"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
@@ -33,6 +34,30 @@ func LatestThirteenF(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		} else {
+			// update the document so that only 40 companies show up
+			if len(thirteenF.Holdings) > 40 {
+				// sort the holdings by value descending
+				sort.Slice(thirteenF.Holdings, func(i, j int) bool {
+					return thirteenF.Holdings[i].NetTotal > thirteenF.Holdings[j].NetTotal
+				})
+
+				otherTotal := 0.0
+				otherShares := 0.0
+				// remove the last holdings
+				for i := 40; i < len(thirteenF.Holdings); i++ {
+					otherTotal += float64(thirteenF.Holdings[i].NetTotal)
+					otherShares += float64(thirteenF.Holdings[i].Shares)
+				}
+
+				thirteenF.Holdings = thirteenF.Holdings[:40]
+				thirteenF.Holdings = append(thirteenF.Holdings, structs.DB_Form13F_Holding{
+					Name:     "Other",
+					NetTotal: float32(otherTotal),
+					Shares:   float32(otherShares),
+					Cik:      "",
+				})
+			}
+
 			c.JSON(http.StatusOK, thirteenF)
 		}
 	}
