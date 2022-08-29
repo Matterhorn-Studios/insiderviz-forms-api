@@ -6,6 +6,7 @@ import (
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/groups/health"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/groups/search"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/groups/single"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/groups/top"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -51,6 +52,12 @@ func AddGroup(r *gin.Engine) {
 			a_g.GET("/top", aggregation.Top)
 			a_g.GET("/featuredIssuers", aggregation.FeaturedIssuers)
 			a_g.GET("/dailySentiment", aggregation.DailySentiment)
+		}
+
+		// top
+		t_g := v1.Group("/top")
+		{
+			t_g.GET("/inst", top.TopInstitutions)
 		}
 	}
 }
