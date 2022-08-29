@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"sort"
+	"strconv"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
@@ -17,10 +18,21 @@ import (
 func LatestThirteenF(c *gin.Context) {
 	cik := c.Param("cik")
 
+	rawOffset := c.Query("offset")
+	offset := 0
+	if rawOffset != "" {
+		var err error
+		offset, err = strconv.Atoi(rawOffset)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
 	thirteenFCollection := config.GetCollection(config.DB, "13F")
 
 	filter := bson.D{{Key: "cik", Value: cik}}
-	opts := options.FindOne().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
+	opts := options.FindOne().SetSort(bson.D{{Key: "periodOfReport", Value: -1}}).SetSkip(int64(offset))
 
 	form := thirteenFCollection.FindOne(context.TODO(), filter, opts)
 
