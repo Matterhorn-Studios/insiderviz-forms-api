@@ -3,6 +3,7 @@ package search
 import (
 	"context"
 	"net/http"
+	"sync"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
 	"github.com/gin-gonic/gin"
@@ -19,19 +20,32 @@ func Search(c *gin.Context) {
 		return
 	}
 
-	issuers, err := searchIssuer(query)
+	var wg sync.WaitGroup
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	var issuers []IssuerRes
+	var reporters []ReporterRes
+	var err error
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		issuers, err = searchIssuer(query)
 
-	reporters, err := searchReporter(query)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}()
+	go func() {
+		defer wg.Done()
+		reporters, err = searchReporter(query)
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}()
+
+	wg.Wait()
 
 	sendItems := make([]SearchSend, 0)
 
