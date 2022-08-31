@@ -28,5 +28,4 @@ func TopInstitutions(c *gin.Context) {
 	cur.All(context.TODO(), &topInstitutions)
 
 	c.JSON(200, topInstitutions)
-
 }

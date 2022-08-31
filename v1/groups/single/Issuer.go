@@ -4,6 +4,7 @@ import (
 	"context"
 	"math/rand"
 	"net/http"
+	"sync"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
@@ -25,39 +26,50 @@ func Issuer(c *gin.Context) {
 	}}
 	opts := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
 
-	deltaForms, err := utils.DeltaFormFetch(filter, opts)
-
-	if err != nil {
-		deltaForms = []structs.DB_DeltaForm{}
-	}
+	var wg sync.WaitGroup
+	var deltaForms []structs.DB_DeltaForm
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		var err error
+		deltaForms, err = utils.DeltaFormFetch(filter, opts)
+		if err != nil {
+			deltaForms = []structs.DB_DeltaForm{}
+		}
+	}()
 
 	var issuer structs.DB_Issuer_Doc
-	if includeGraph == "true" {
-		issuer, err = utils.UpdateStockData(cik)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-			return
-		}
-	} else {
-		// get the issuer's information
-		issuerCollection := config.GetCollection(config.DB, "Issuer")
-		filter = bson.D{{Key: "cik", Value: cik}}
-		opts := options.FindOne().SetProjection(bson.D{{Key: "stockData", Value: 0}})
+	go func() {
+		defer wg.Done()
+		var err error
+		if includeGraph == "true" {
+			issuer, err = utils.UpdateStockData(cik)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
+				return
+			}
+		} else {
+			// get the issuer's information
+			issuerCollection := config.GetCollection(config.DB, "Issuer")
+			filter = bson.D{{Key: "cik", Value: cik}}
+			opts := options.FindOne().SetProjection(bson.D{{Key: "stockData", Value: 0}})
 
-		// do not include the stockData
-		issuerInfo := issuerCollection.FindOne(context.TODO(), filter, opts)
+			// do not include the stockData
+			issuerInfo := issuerCollection.FindOne(context.TODO(), filter, opts)
 
-		if issuerInfo.Err() != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error1": issuerInfo.Err().Error()})
-			return
-		}
+			if issuerInfo.Err() != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error1": issuerInfo.Err().Error()})
+				return
+			}
 
-		// unmarshal the issuer info
-		if err = issuerInfo.Decode(&issuer); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-			return
+			// unmarshal the issuer info
+			if err = issuerInfo.Decode(&issuer); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
+				return
+			}
 		}
-	}
+	}()
+	wg.Wait()
 
 	c.JSON(http.StatusOK, gin.H{"forms": deltaForms, "info": issuer})
 }
