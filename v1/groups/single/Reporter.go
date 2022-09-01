@@ -100,7 +100,7 @@ func Reporter(c *gin.Context) {
 	issuerInfo := reporterCollection.FindOne(context.TODO(), filter)
 
 	if issuerInfo.Err() != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error1": issuerInfo.Err().Error()})
+		c.JSON(http.StatusNotFound, gin.H{"message": issuerInfo.Err().Error()})
 		return
 	}
 
