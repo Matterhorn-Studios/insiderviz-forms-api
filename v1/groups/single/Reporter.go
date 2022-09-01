@@ -36,11 +36,11 @@ func LatestThirteenF(c *gin.Context) {
 
 	form := thirteenFCollection.FindOne(context.TODO(), filter, opts)
 
+	var thirteenF structs.DB_Form13F_Base
 	if form.Err() != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": form.Err().Error()})
+		c.JSON(http.StatusOK, gin.H{"status": "empty", "form": structs.DB_Form13F_Base{}})
 		return
 	} else {
-		var thirteenF structs.DB_Form13F_Base
 		err := form.Decode(&thirteenF)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -70,7 +70,7 @@ func LatestThirteenF(c *gin.Context) {
 				})
 			}
 
-			c.JSON(http.StatusOK, thirteenF)
+			c.JSON(http.StatusOK, gin.H{"status": "ok", "form": thirteenF})
 		}
 	}
 
