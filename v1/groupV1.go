@@ -52,6 +52,7 @@ func AddGroup(r *gin.Engine) {
 			a_g.GET("/top", aggregation.Top)
 			a_g.GET("/featuredIssuers", aggregation.FeaturedIssuers)
 			a_g.GET("/dailySentiment", aggregation.DailySentiment)
+			a_g.GET("/dailySentimentV2", aggregation.DailySentimentV2)
 		}
 
 		// top
