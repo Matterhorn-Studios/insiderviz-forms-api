@@ -14,6 +14,8 @@ type DB_Issuer_Doc struct {
 	StockData            []StockData `json:"stockData" bson:"stockData"`
 	StockDataSplit       bool        `json:"stockDataSplit" bson:"stockDataSplit"`
 	Splits               []Split     `json:"splits" bson:"splits"`
+	Sector               string      `json:"sector" bson:"sector"`
+	Industry             string      `json:"industry" bson:"industry"`
 }
 
 // D = date, C = close, V = volume
