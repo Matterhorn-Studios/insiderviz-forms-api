@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
 	"github.com/gin-gonic/gin"
@@ -29,7 +29,7 @@ func LatestThirteenF(c *gin.Context) {
 		}
 	}
 
-	thirteenFCollection := config.GetCollection(config.DB, "13F")
+	thirteenFCollection := database.GetCollection("13F")
 
 	filter := bson.D{{Key: "cik", Value: cik}}
 	opts := options.FindOne().SetSort(bson.D{{Key: "periodOfReport", Value: -1}}).SetSkip(int64(offset))
@@ -94,7 +94,7 @@ func Reporter(c *gin.Context) {
 	}
 
 	// get the reporter's information
-	reporterCollection := config.GetCollection(config.DB, "Reporter")
+	reporterCollection := database.GetCollection("Reporter")
 	filter = bson.D{{Key: "cik", Value: cik}}
 
 	issuerInfo := reporterCollection.FindOne(context.TODO(), filter)
@@ -116,7 +116,7 @@ func Reporter(c *gin.Context) {
 
 func RandomReporter(c *gin.Context) {
 	// get the reporter collection
-	reporterCollection := config.GetCollection(config.DB, "Reporter")
+	reporterCollection := database.GetCollection("Reporter")
 	var reporter structs.DB_Reporter_Doc
 
 	for {

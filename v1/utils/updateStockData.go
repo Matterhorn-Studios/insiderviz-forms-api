@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -18,7 +18,7 @@ func UpdateStockData(cik string) (structs.DB_Issuer_Doc, error) {
 	var issuer structs.DB_Issuer_Doc
 
 	// get the current issuer info
-	issuerCollection := config.GetCollection(config.DB, "Issuer")
+	issuerCollection := database.GetCollection("Issuer")
 	filter := bson.D{{Key: "cik", Value: cik}}
 
 	issuerInfo := issuerCollection.FindOne(context.TODO(), filter)

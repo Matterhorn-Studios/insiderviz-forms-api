@@ -3,7 +3,7 @@ package utils
 import (
 	"context"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,7 +11,7 @@ import (
 )
 
 func DeltaFormFetch(filter primitive.D, opts *options.FindOptions) ([]structs.DB_DeltaForm, error) {
-	var deltaCollection *mongo.Collection = config.GetCollection(config.DB, "DeltaForm")
+	var deltaCollection *mongo.Collection = database.GetCollection("DeltaForm")
 	deltaForms := make([]structs.DB_DeltaForm, 0)
 	data, errFetch := deltaCollection.Find(context.TODO(), filter, opts)
 	if errFetch != nil {

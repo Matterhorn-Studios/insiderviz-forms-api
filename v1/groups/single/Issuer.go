@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
 	"github.com/gin-gonic/gin"
@@ -50,7 +50,7 @@ func Issuer(c *gin.Context) {
 			}
 		} else {
 			// get the issuer's information
-			issuerCollection := config.GetCollection(config.DB, "Issuer")
+			issuerCollection := database.GetCollection("Issuer")
 			filter = bson.D{{Key: "cik", Value: cik}}
 			opts := options.FindOne().SetProjection(bson.D{{Key: "stockData", Value: 0}})
 
@@ -76,7 +76,7 @@ func Issuer(c *gin.Context) {
 
 func RandomIssuer(c *gin.Context) {
 	// get the issuer collection
-	issuerCollection := config.GetCollection(config.DB, "Issuer")
+	issuerCollection := database.GetCollection("Issuer")
 	var issuer structs.DB_Issuer_Doc
 
 	for {
