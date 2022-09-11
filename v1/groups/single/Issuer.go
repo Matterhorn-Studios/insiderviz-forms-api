@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"sync"
 
+	iv_structs "github.com/Matterhorn-Studios/insiderviz-backend_structs"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -27,18 +27,18 @@ func Issuer(c *gin.Context) {
 	opts := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
 
 	var wg sync.WaitGroup
-	var deltaForms []structs.DB_DeltaForm
+	var deltaForms []iv_structs.DB_DeltaForm
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		var err error
 		deltaForms, err = utils.DeltaFormFetch(filter, opts)
 		if err != nil {
-			deltaForms = []structs.DB_DeltaForm{}
+			deltaForms = []iv_structs.DB_DeltaForm{}
 		}
 	}()
 
-	var issuer structs.DB_Issuer_Doc
+	var issuer iv_structs.DB_Issuer_Doc
 	go func() {
 		defer wg.Done()
 		var err error
@@ -77,7 +77,7 @@ func Issuer(c *gin.Context) {
 func RandomIssuer(c *gin.Context) {
 	// get the issuer collection
 	issuerCollection := database.GetCollection("Issuer")
-	var issuer structs.DB_Issuer_Doc
+	var issuer iv_structs.DB_Issuer_Doc
 
 	for {
 		// get a random offset 1-5000

@@ -4,14 +4,14 @@ import (
 	"context"
 	"net/http"
 
+	iv_structs "github.com/Matterhorn-Studios/insiderviz-backend_structs"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func DailySentimentV2(c *gin.Context) {
-	var dailySentiment []structs.DB_SentimentDay
+	var dailySentiment []iv_structs.DB_SentimentDay
 	cursor, err := database.GetCollection("DailySentiment").Find(context.TODO(), bson.D{{}})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
