@@ -11,7 +11,7 @@ import (
 )
 
 func TopInstitutions(c *gin.Context) {
-	reporterCollection := config.GetCollection(config.DB, "Reporter")
+	reporterCollection := database.GetCollection("Reporter")
 
 	// get the top institutions, ordered by last13FTotal descending
 	opts := options.Find().SetSort(bson.D{{Key: "last13FTotal", Value: -1}}).SetLimit(10)

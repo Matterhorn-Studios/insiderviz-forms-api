@@ -2,8 +2,8 @@ package utils
 
 import (
 	"net/http"
+	"os"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +12,7 @@ func AuthCheck() gin.HandlerFunc {
 
 		// check the header
 		sentAuth := c.GetHeader("Authorization")
-		realAuth := config.GetEnvVariable("AUTH_TOKEN")
+		realAuth := os.Getenv("AUTH_TOKEN")
 
 		if sentAuth != realAuth {
 			c.AbortWithStatus(http.StatusUnauthorized)

@@ -3,7 +3,7 @@ package top
 import (
 	"context"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -52,6 +52,9 @@ func MostBought(startDate string, formClass string) ([]bson.M, error) {
 			{Key: "name", Value: bson.D{
 				{Key: "$first", Value: "$issuer.issuerName"},
 			}},
+			{Key: "ticker", Value: bson.D{
+				{Key: "$first", Value: "$issuer.issuerTicker"},
+			}},
 		}},
 	}
 
@@ -64,7 +67,7 @@ func MostBought(startDate string, formClass string) ([]bson.M, error) {
 	limitStage := bson.D{{Key: "$limit", Value: 10}}
 
 	// run the aggregate on delta form
-	cursor, err := config.GetCollection(config.DB, "DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState, limitStage})
+	cursor, err := database.GetCollection("DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState, limitStage})
 	if err != nil {
 		return results, err
 	}

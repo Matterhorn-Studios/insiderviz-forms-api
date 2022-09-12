@@ -29,16 +29,22 @@ func LatestThirteenF(c *gin.Context) {
 		}
 	}
 
-	thirteenFCollection := config.GetCollection(config.DB, "13F")
+	thirteenFCollection := database.GetCollection("13F")
 
 	filter := bson.D{{Key: "cik", Value: cik}}
 	opts := options.FindOne().SetSort(bson.D{{Key: "periodOfReport", Value: -1}}).SetSkip(int64(offset))
 
 	form := thirteenFCollection.FindOne(context.TODO(), filter, opts)
 
+<<<<<<< HEAD
 	var thirteenF iv_models.DB_Form13F_Base
 	if form.Err() != nil {
 		c.JSON(http.StatusOK, gin.H{"status": "empty", "form": iv_models.DB_Form13F_Base{}})
+=======
+	var thirteenF iv_structs.DB_Form13F_Base
+	if form.Err() != nil {
+		c.JSON(http.StatusOK, gin.H{"status": "empty", "form": iv_structs.DB_Form13F_Base{}})
+>>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 		return
 	} else {
 		err := form.Decode(&thirteenF)
@@ -62,7 +68,11 @@ func LatestThirteenF(c *gin.Context) {
 				}
 
 				thirteenF.Holdings = thirteenF.Holdings[:40]
+<<<<<<< HEAD
 				thirteenF.Holdings = append(thirteenF.Holdings, iv_models.DB_Form13F_Holding{
+=======
+				thirteenF.Holdings = append(thirteenF.Holdings, iv_structs.DB_Form13F_Holding{
+>>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 					Name:     "Other",
 					NetTotal: float32(otherTotal),
 					Shares:   float32(otherShares),
@@ -90,11 +100,15 @@ func Reporter(c *gin.Context) {
 	deltaForms, err := utils.DeltaFormFetch(filter, opts)
 
 	if err != nil {
+<<<<<<< HEAD
 		deltaForms = []iv_models.DB_DeltaForm{}
+=======
+		deltaForms = []iv_structs.DB_DeltaForm{}
+>>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 	}
 
 	// get the reporter's information
-	reporterCollection := config.GetCollection(config.DB, "Reporter")
+	reporterCollection := database.GetCollection("Reporter")
 	filter = bson.D{{Key: "cik", Value: cik}}
 
 	issuerInfo := reporterCollection.FindOne(context.TODO(), filter)
@@ -116,8 +130,13 @@ func Reporter(c *gin.Context) {
 
 func RandomReporter(c *gin.Context) {
 	// get the reporter collection
+<<<<<<< HEAD
 	reporterCollection := config.GetCollection(config.DB, "Reporter")
 	var reporter iv_models.DB_Reporter_Doc
+=======
+	reporterCollection := database.GetCollection("Reporter")
+	var reporter iv_structs.DB_Reporter_Doc
+>>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 
 	for {
 		// get a random offset 1-5000

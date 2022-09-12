@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -125,7 +125,7 @@ func searchIssuer(query string) ([]IssuerRes, error) {
 
 	limitFilter := bson.D{{Key: "$limit", Value: 10}}
 
-	cursor, err := config.GetCollection(config.DB, "Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
+	cursor, err := database.GetCollection("Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
 	var issuers []IssuerRes
 	if err != nil {
 		return issuers, err
@@ -169,7 +169,7 @@ func searchReporter(query string) ([]ReporterRes, error) {
 
 	limitFilter := bson.D{{Key: "$limit", Value: 10}}
 
-	cursor, err := config.GetCollection(config.DB, "Reporter").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
+	cursor, err := database.GetCollection("Reporter").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
 	var reporters []ReporterRes
 	if err != nil {
 		return reporters, err

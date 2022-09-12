@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -92,7 +92,7 @@ func DailySentiment(c *gin.Context) {
 	}
 
 	// run the aggregate
-	cursor, err := config.GetCollection(config.DB, "DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState})
+	cursor, err := database.GetCollection("DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState})
 	if err != nil {
 		panic(err)
 	}

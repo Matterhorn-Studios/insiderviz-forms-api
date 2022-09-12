@@ -6,7 +6,12 @@ import (
 	"net/http"
 	"sync"
 
+<<<<<<< HEAD
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+=======
+	iv_structs "github.com/Matterhorn-Studios/insiderviz-backend_structs"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
+>>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"github.com/gin-gonic/gin"
@@ -50,7 +55,7 @@ func Issuer(c *gin.Context) {
 			}
 		} else {
 			// get the issuer's information
-			issuerCollection := config.GetCollection(config.DB, "Issuer")
+			issuerCollection := database.GetCollection("Issuer")
 			filter = bson.D{{Key: "cik", Value: cik}}
 			opts := options.FindOne().SetProjection(bson.D{{Key: "stockData", Value: 0}})
 
@@ -76,8 +81,13 @@ func Issuer(c *gin.Context) {
 
 func RandomIssuer(c *gin.Context) {
 	// get the issuer collection
+<<<<<<< HEAD
 	issuerCollection := config.GetCollection(config.DB, "Issuer")
 	var issuer iv_models.DB_Issuer_Doc
+=======
+	issuerCollection := database.GetCollection("Issuer")
+	var issuer iv_structs.DB_Issuer_Doc
+>>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 
 	for {
 		// get a random offset 1-5000

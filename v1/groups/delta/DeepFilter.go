@@ -117,7 +117,11 @@ func DeepFilter(c *gin.Context) {
 
 }
 
+<<<<<<< HEAD
 func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateStart string, dateEnd string, formClass []string, netTotalMin float64, netTotalMax float64, sharesMin float64, sharesMax float64, sharePriceMin float64, sharePriceMax float64, take int64, skip int64) ([]iv_models.DB_DeltaForm, error) {
+=======
+func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateStart string, dateEnd string, formClass []string, netTotalMin float64, netTotalMax float64, sharesMin float64, sharesMax float64, sharePriceMin float64, sharePriceMax float64, take int64, skip int64) ([]iv_structs.DB_DeltaForm, error) {
+>>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 
 	buyOrSellFilter := bson.E{}
 	if buyOrSellOrBoth == "Buy" {
