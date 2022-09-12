@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -104,11 +104,7 @@ func UpdateStockData(cik string) (iv_models.DB_Issuer_Doc, error) {
 			curSplit *= top / bot
 		}
 
-<<<<<<< HEAD
 		issuer.StockData = make([]iv_models.StockData, 0)
-=======
-		issuer.StockData = make([]iv_structs.StockData, 0)
->>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 
 		for _, day := range apiRes {
 			// check the split
@@ -129,22 +125,14 @@ func UpdateStockData(cik string) (iv_models.DB_Issuer_Doc, error) {
 					// apply the split
 					day.Close /= curSplit
 				}
-<<<<<<< HEAD
 				temp := iv_models.StockData{
-=======
-				temp := iv_structs.StockData{
->>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 					Date:   day.Date,
 					Close:  day.Close,
 					Volume: day.Volume,
 				}
 				issuer.StockData = append(issuer.StockData, temp)
 			} else {
-<<<<<<< HEAD
 				temp := iv_models.StockData{
-=======
-				temp := iv_structs.StockData{
->>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 					Date:   day.Date,
 					Close:  day.Close,
 					Volume: day.Volume,
@@ -229,11 +217,7 @@ func UpdateStockData(cik string) (iv_models.DB_Issuer_Doc, error) {
 			curSplit *= top / bot
 		}
 
-<<<<<<< HEAD
 		addGroup := make([]iv_models.StockData, 0)
-=======
-		addGroup := make([]iv_structs.StockData, 0)
->>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 
 		for _, day := range apiRes {
 			if day.Date != startDate {
@@ -256,11 +240,7 @@ func UpdateStockData(cik string) (iv_models.DB_Issuer_Doc, error) {
 						day.Close /= curSplit
 					}
 				}
-<<<<<<< HEAD
 				temp := iv_models.StockData{
-=======
-				temp := iv_structs.StockData{
->>>>>>> 593ca62fdbab58a70df67f3c6af0b8ea92c171a6
 					Date:   day.Date,
 					Close:  day.Close,
 					Volume: day.Volume,

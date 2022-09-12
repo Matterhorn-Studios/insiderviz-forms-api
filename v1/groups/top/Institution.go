@@ -3,7 +3,7 @@ package top
 import (
 	"context"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
