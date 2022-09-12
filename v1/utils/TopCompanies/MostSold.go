@@ -51,6 +51,9 @@ func MostSold(startDate string, formClass string) ([]bson.M, error) {
 			{Key: "name", Value: bson.D{
 				{Key: "$first", Value: "$issuer.issuerName"},
 			}},
+			{Key: "ticker", Value: bson.D{
+				{Key: "$first", Value: "$issuer.issuerTicker"},
+			}},
 		}},
 	}
 
