@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
+	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -36,9 +36,9 @@ func LatestThirteenF(c *gin.Context) {
 
 	form := thirteenFCollection.FindOne(context.TODO(), filter, opts)
 
-	var thirteenF structs.DB_Form13F_Base
+	var thirteenF iv_models.DB_Form13F_Base
 	if form.Err() != nil {
-		c.JSON(http.StatusOK, gin.H{"status": "empty", "form": structs.DB_Form13F_Base{}})
+		c.JSON(http.StatusOK, gin.H{"status": "empty", "form": iv_models.DB_Form13F_Base{}})
 		return
 	} else {
 		err := form.Decode(&thirteenF)
@@ -62,7 +62,7 @@ func LatestThirteenF(c *gin.Context) {
 				}
 
 				thirteenF.Holdings = thirteenF.Holdings[:40]
-				thirteenF.Holdings = append(thirteenF.Holdings, structs.DB_Form13F_Holding{
+				thirteenF.Holdings = append(thirteenF.Holdings, iv_models.DB_Form13F_Holding{
 					Name:     "Other",
 					NetTotal: float32(otherTotal),
 					Shares:   float32(otherShares),
@@ -90,7 +90,7 @@ func Reporter(c *gin.Context) {
 	deltaForms, err := utils.DeltaFormFetch(filter, opts)
 
 	if err != nil {
-		deltaForms = []structs.DB_DeltaForm{}
+		deltaForms = []iv_models.DB_DeltaForm{}
 	}
 
 	// get the reporter's information
@@ -117,7 +117,7 @@ func Reporter(c *gin.Context) {
 func RandomReporter(c *gin.Context) {
 	// get the reporter collection
 	reporterCollection := config.GetCollection(config.DB, "Reporter")
-	var reporter structs.DB_Reporter_Doc
+	var reporter iv_models.DB_Reporter_Doc
 
 	for {
 		// get a random offset 1-5000

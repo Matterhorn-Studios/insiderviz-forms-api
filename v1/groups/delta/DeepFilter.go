@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
+	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -117,7 +117,7 @@ func DeepFilter(c *gin.Context) {
 
 }
 
-func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateStart string, dateEnd string, formClass []string, netTotalMin float64, netTotalMax float64, sharesMin float64, sharesMax float64, sharePriceMin float64, sharePriceMax float64, take int64, skip int64) ([]structs.DB_DeltaForm, error) {
+func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateStart string, dateEnd string, formClass []string, netTotalMin float64, netTotalMax float64, sharesMin float64, sharesMax float64, sharePriceMin float64, sharePriceMax float64, take int64, skip int64) ([]iv_models.DB_DeltaForm, error) {
 
 	buyOrSellFilter := bson.E{}
 	if buyOrSellOrBoth == "Buy" {

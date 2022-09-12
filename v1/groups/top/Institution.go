@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/config"
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/structs"
+	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -23,7 +23,7 @@ func TopInstitutions(c *gin.Context) {
 		return
 	}
 
-	var topInstitutions []structs.DB_Reporter_Doc
+	var topInstitutions []iv_models.DB_Reporter_Doc
 
 	cur.All(context.TODO(), &topInstitutions)
 
