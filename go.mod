@@ -3,7 +3,7 @@ module github.com/Matterhorn-Studios/insiderviz-forms-api
 go 1.19
 
 require (
-	github.com/Matterhorn-Studios/insidervizforms v1.0.6
+	github.com/Matterhorn-Studios/insidervizforms v1.0.9
 	github.com/gin-gonic/gin v1.8.1
 	github.com/joho/godotenv v1.4.0
 	go.mongodb.org/mongo-driver v1.10.0

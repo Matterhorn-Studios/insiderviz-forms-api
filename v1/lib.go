@@ -54,6 +54,7 @@ func AddGroup(r *gin.Engine) {
 			a_g.GET("/dailySentiment", aggregation.DailySentiment)
 			a_g.GET("/dailySentimentV2", aggregation.DailySentimentV2)
 			a_g.GET("/sectorHistory", aggregation.SectorHistory)
+			a_g.GET("/topFromSector", aggregation.TopFromSector)
 		}
 
 		// top
