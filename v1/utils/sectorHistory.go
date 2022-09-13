@@ -16,7 +16,7 @@ func CalcSectorHistory(startDate string) ([]iv_models.DB_Sector, error) {
 	matchStage := bson.D{
 		{Key: "$match", Value: bson.D{
 			{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: startDate}}},
-			{Key: "issuer.issuerSector", Value: bson.D{{Key: "$in", Value: bson.A{"Financial", "Real Estate", "Healthcare", "Consumer Defensive", "Fund", "Energy", "Basic Materials", "Industrials", "Technology", "Utilities", "Consumer Cyclical", "Communication Services", "Financial Services"}}}},
+			{Key: "issuer.issuerSector", Value: bson.D{{Key: "$in", Value: bson.A{"Real Estate", "Healthcare", "Consumer Defensive", "Fund", "Energy", "Basic Materials", "Industrials", "Technology", "Utilities", "Consumer Cyclical", "Communication Services", "Financial Services"}}}},
 		}},
 	}
 

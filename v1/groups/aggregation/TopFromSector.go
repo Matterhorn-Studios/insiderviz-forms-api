@@ -34,7 +34,7 @@ func TopFromSector(c *gin.Context) {
 	// get the start date from the query
 	startDate := c.Query("startDate")
 
-	sectors := []string{"Financial", "Real Estate", "Healthcare", "Consumer Defensive", "Fund", "Energy", "Basic Materials", "Industrials", "Technology", "Utilities", "Consumer Cyclical", "Communication Services", "Financial Services"}
+	sectors := []string{"Real Estate", "Healthcare", "Consumer Defensive", "Fund", "Energy", "Basic Materials", "Industrials", "Technology", "Utilities", "Consumer Cyclical", "Communication Services", "Financial Services"}
 
 	s := SafeSectorList{data: make([]iv_models.Top_From_Sector, 0), err: nil}
 
