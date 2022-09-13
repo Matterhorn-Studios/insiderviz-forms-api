@@ -2,7 +2,6 @@ package utils
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
@@ -122,8 +121,6 @@ func CalcSectorHistory(startDate string) ([]iv_models.DB_Sector, error) {
 	if err = cursor.All(context.TODO(), &results); err != nil {
 		return results, err
 	}
-
-	fmt.Println(results[0].HistoricalData)
 
 	return results, nil
 }
