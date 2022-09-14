@@ -11,8 +11,10 @@ import (
 
 func main() {
 	// init env
-	if err := godotenv.Load(); err != nil {
-		panic(err)
+	if os.Getenv("GO_ENV") != "production" {
+		if err := godotenv.Load(); err != nil {
+			panic(err)
+		}
 	}
 
 	// create app
