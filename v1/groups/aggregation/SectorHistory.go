@@ -1,7 +1,6 @@
 package aggregation
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
@@ -38,9 +37,6 @@ func addSectorToData(data *[]SectorHistoryData, sector iv_models.DB_Sector) {
 
 			if curDataPt.Date == histItem.Date {
 				// append to already existing entry
-				if histItem.Date == "2022-09-12" {
-					fmt.Println(sector.Id.Name)
-				}
 				appendCorrectSector(&(*data)[i], sector.Id.Name, histItem.Total)
 				found = true
 				break
