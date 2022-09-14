@@ -1,74 +1,46 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
 	"os"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
 	v1 "github.com/Matterhorn-Studios/insiderviz-forms-api/v1"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
 )
 
 func main() {
-	fmt.Println("STARTING SERVER...")
-
-	err := run()
-
-	if err != nil {
-		fmt.Println("SERVER ERROR:", err)
-		os.Exit(1)
-	}
-}
-
-func run() error {
-	// ENV SETUP
-	if err := initEnv(); err != nil {
-		return err
+	// init env
+	if err := godotenv.Load(); err != nil {
+		panic(err)
 	}
 
-	// DB SETUP
-	if err := database.InitDb(); err != nil {
-		return err
+	// create app
+	app := fiber.New()
+
+	// setup logger
+	app.Use(logger.New(logger.Config{
+		Format: "[${ip}]:${port} ${status} - ${method} ${path} ${latency}\n",
+	}))
+
+	// add v1 group
+	if err := v1.AddV1Group(app); err != nil {
+		panic(err)
 	}
 
-	// ROUTER SETUP
-	r := setupRouter()
+	// add root ping
+	app.Get("/ping", func(c *fiber.Ctx) error {
+		return c.SendString("pong")
+	})
 
-	// PORT SETUP
+	// setup port
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	// RUN ON PORT
-	r.Run(":" + port)
-
-	return nil
-}
-
-func setupRouter() *gin.Engine {
-	r := gin.Default()
-
-	// add the V1 group
-	v1.AddGroup(r)
-
-	// Ping test
-	r.GET("/ping", func(c *gin.Context) {
-		c.String(http.StatusOK, "pong")
-	})
-
-	return r
-}
-
-func initEnv() error {
-	if os.Getenv("GO_ENV") != "production" {
-		err := godotenv.Load()
-		if err != nil {
-			return err
-		}
+	// start server
+	if err := app.Listen(":" + port); err != nil {
+		panic(err)
 	}
-
-	return nil
 }

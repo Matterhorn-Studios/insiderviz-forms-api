@@ -1,12 +1,11 @@
-package aggregation
+package v1_handlers
 
 import (
-	"net/http"
 	"sync"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
 type SafeSectorList struct {
@@ -17,7 +16,7 @@ type SafeSectorList struct {
 
 func (s *SafeSectorList) GetDataForSector(startDate string, sector string, wg *sync.WaitGroup) {
 
-	data, err := utils.TopFromSector(startDate, sector)
+	data, err := lib.TopFromSector(startDate, sector)
 	if err != nil {
 		s.err = err
 	}
@@ -30,7 +29,7 @@ func (s *SafeSectorList) GetDataForSector(startDate string, sector string, wg *s
 
 }
 
-func TopFromSector(c *gin.Context) {
+func TopFromSector(c *fiber.Ctx) error {
 	// get the start date from the query
 	startDate := c.Query("startDate")
 
@@ -48,9 +47,8 @@ func TopFromSector(c *gin.Context) {
 	wg.Wait()
 
 	if s.err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": s.err.Error()})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": s.err})
 	}
 
-	c.JSON(http.StatusOK, s.data)
+	return c.JSON(s.data)
 }

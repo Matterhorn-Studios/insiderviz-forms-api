@@ -1,21 +1,20 @@
-package single
+package v1_handlers
 
 import (
 	"context"
 	"math/rand"
-	"net/http"
 	"sync"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Issuer(c *gin.Context) {
-	cik := c.Param("cik")
+func Issuer(c *fiber.Ctx) error {
+	cik := c.Params("cik")
 	includeGraph := c.Query("includeGraph")
 
 	filter := bson.D{{Key: "issuer.issuerCik", Value: cik}, {
@@ -32,25 +31,22 @@ func Issuer(c *gin.Context) {
 	go func() {
 		defer wg.Done()
 		var err error
-		deltaForms, err = utils.DeltaFormFetch(filter, opts)
+		deltaForms, err = lib.DeltaFormFetch(filter, opts)
 		if err != nil {
 			deltaForms = []iv_models.DB_DeltaForm{}
 		}
 	}()
 
 	var issuer iv_models.DB_Issuer_Doc
+	var err error
 	go func() {
 		defer wg.Done()
-		var err error
 		if includeGraph == "true" {
-			issuer, err = utils.UpdateStockData(cik)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-				return
-			}
+			issuer, err = lib.UpdateStockData(cik)
+
 		} else {
 			// get the issuer's information
-			issuerCollection := database.GetCollection("Issuer")
+			issuerCollection := v1_database.GetCollection("Issuer")
 			filter = bson.D{{Key: "cik", Value: cik}}
 			opts := options.FindOne().SetProjection(bson.D{{Key: "stockData", Value: 0}})
 
@@ -58,25 +54,26 @@ func Issuer(c *gin.Context) {
 			issuerInfo := issuerCollection.FindOne(context.TODO(), filter, opts)
 
 			if issuerInfo.Err() != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error1": issuerInfo.Err().Error()})
-				return
+				err = issuerInfo.Err()
 			}
 
 			// unmarshal the issuer info
-			if err = issuerInfo.Decode(&issuer); err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-				return
-			}
+			err = issuerInfo.Decode(&issuer)
 		}
 	}()
+
 	wg.Wait()
 
-	c.JSON(http.StatusOK, gin.H{"forms": deltaForms, "info": issuer})
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
+	}
+
+	return c.JSON(fiber.Map{"forms": deltaForms, "info": issuer})
 }
 
-func RandomIssuer(c *gin.Context) {
+func RandomIssuer(c *fiber.Ctx) error {
 	// get the issuer collection
-	issuerCollection := database.GetCollection("Issuer")
+	issuerCollection := v1_database.GetCollection("Issuer")
 	var issuer iv_models.DB_Issuer_Doc
 
 	for {
@@ -93,29 +90,27 @@ func RandomIssuer(c *gin.Context) {
 					// check the issuer has forms
 					filter := bson.D{{Key: "issuer.issuerCik", Value: issuer.Cik}}
 					opts2 := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}}).SetLimit(1)
-					deltaForms, err := utils.DeltaFormFetch(filter, opts2)
+					deltaForms, err := lib.DeltaFormFetch(filter, opts2)
 					if err == nil {
 						if len(deltaForms) > 0 && deltaForms[0].PeriodOfReport > "2021-01-01" {
-							c.JSON(http.StatusOK, issuer)
-							return
+							return c.JSON(issuer)
 						}
 					}
 				}
 			}
 		}
-
 	}
+
 }
 
-func IssuerGraph(c *gin.Context) {
-	cik := c.Param("cik")
+func IssuerGraph(c *fiber.Ctx) error {
+	cik := c.Params("cik")
 
 	// get the stock data
-	stockData, err := utils.UpdateStockData(cik)
+	stockData, err := lib.UpdateStockData(cik)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 	}
 
-	c.JSON(http.StatusOK, stockData)
+	return c.JSON(stockData)
 }

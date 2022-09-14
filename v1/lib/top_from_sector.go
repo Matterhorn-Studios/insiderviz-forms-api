@@ -1,9 +1,9 @@
-package utils
+package lib
 
 import (
 	"context"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -51,7 +51,7 @@ func TopFromSector(startDate string, sector string) (iv_models.Top_From_Sector, 
 
 	limitStage := bson.D{{Key: "$limit", Value: 5}}
 
-	cursor, err := database.GetCollection("DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderStage, limitStage})
+	cursor, err := v1_database.GetCollection("DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderStage, limitStage})
 	if err != nil {
 		return result, err
 	}

@@ -1,22 +1,18 @@
-package aggregation
+package v1_handlers
 
 import (
-	"net/http"
-
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
-func SectorHistory(c *gin.Context) {
+func SectorHistory(c *fiber.Ctx) error {
 	// get the start datefrom the query
 	startDate := c.Query("startDate")
 
-	data, err := utils.CalcSectorHistory(startDate)
+	data, err := lib.CalcSectorHistory(startDate)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 	}
 
 	sendData := make([]SectorHistoryData, 0)
@@ -25,7 +21,7 @@ func SectorHistory(c *gin.Context) {
 		addSectorToData(&sendData, v)
 	}
 
-	c.JSON(http.StatusOK, sendData)
+	return c.JSON(sendData)
 }
 
 func addSectorToData(data *[]SectorHistoryData, sector iv_models.DB_Sector) {

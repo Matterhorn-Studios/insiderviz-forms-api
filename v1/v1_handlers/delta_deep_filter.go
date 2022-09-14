@@ -1,13 +1,12 @@
-package delta
+package v1_handlers
 
 import (
-	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -28,12 +27,11 @@ import (
 // take: int
 // skip: int
 
-func DeepFilter(c *gin.Context) {
+func DeepFilter(c *fiber.Ctx) error {
 	// get the params and validate
 	sortBy := c.Query("sortBy")
 	if sortBy != "periodOfReport" && sortBy != "netTotal" && sortBy != "shares" && sortBy != "sharePrice" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "sortBy must be periodOfReport, netTotal, shares, or sharePrice"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "sortBy must be periodOfReport, netTotal, shares, or sharePrice"})
 	}
 
 	formClass := c.Query("formClass")
@@ -41,7 +39,7 @@ func DeepFilter(c *gin.Context) {
 
 	order := c.Query("order")
 	if order != "asc" && order != "desc" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "order must be asc or desc"})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "order must be asc or desc"})
 	}
 
 	dateStart := c.Query("dateStart")
@@ -52,68 +50,59 @@ func DeepFilter(c *gin.Context) {
 	netTotalMinQuery := c.Query("netTotalMin")
 	netTotalMin, err := strconv.ParseFloat(netTotalMinQuery, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "netTotalMin must be a float"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "netTotalMin must be a float"})
 	}
 
 	netTotalMaxQuery := c.Query("netTotalMax")
 	netTotalMax, err := strconv.ParseFloat(netTotalMaxQuery, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "netTotalMax must be a float"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "netTotalMax must be a float"})
 	}
 
 	sharesMinQuery := c.Query("sharesMin")
 	sharesMin, err := strconv.ParseFloat(sharesMinQuery, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "sharesMin must be a float"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "sharesMin must be a float"})
 	}
 
 	sharesMaxQuery := c.Query("sharesMax")
 	sharesMax, err := strconv.ParseFloat(sharesMaxQuery, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "sharesMax must be a float"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "sharesMax must be a float"})
 	}
 
 	sharePriceMinQuery := c.Query("sharePriceMin")
 	sharePriceMin, err := strconv.ParseFloat(sharePriceMinQuery, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "sharePriceMin must be a float"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "sharePriceMin must be a float"})
 	}
 
 	sharePriceMaxQuery := c.Query("sharePriceMax")
 	sharePriceMax, err := strconv.ParseFloat(sharePriceMaxQuery, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "sharePriceMax must be a float"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "sharePriceMax must be a float"})
 	}
 
 	takeQuery := c.Query("take")
 	take, err := strconv.ParseInt(takeQuery, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "take must be an int"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "take must be an int"})
 	}
 
 	skipQuery := c.Query("skip")
 	skip, err := strconv.ParseInt(skipQuery, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "skip must be an int"})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "skip must be an int"})
 	}
 
 	// call the function
 	forms, err := HandleDeepFilter(sortBy, order, buyOrSellOrBoth, dateStart, dateEnd, formClassArray, netTotalMin, netTotalMax, sharesMin, sharesMax, sharePriceMin, sharePriceMax, take, skip)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 	}
 
-	c.JSON(http.StatusOK, forms)
+	return c.JSON(forms)
 
 }
 
@@ -169,7 +158,7 @@ func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateS
 	}
 
 	// run the query
-	deltaForms, err := utils.DeltaFormFetch(filter, opts)
+	deltaForms, err := lib.DeltaFormFetch(filter, opts)
 
 	if err != nil {
 		return deltaForms, err

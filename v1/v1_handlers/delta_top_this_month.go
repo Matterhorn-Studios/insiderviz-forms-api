@@ -1,17 +1,16 @@
-package delta
+package v1_handlers
 
 import (
-	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
-	"github.com/gin-gonic/gin"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func TopThisMonth(c *gin.Context) {
+func TopThisMonth(c *fiber.Ctx) error {
 	// get the params
 	buySellOrBoth := c.Query("buySellOrBoth")
 	insiderCongressOrBoth := c.Query("insiderCongressOrBoth")
@@ -56,12 +55,11 @@ func TopThisMonth(c *gin.Context) {
 	filter := bson.D{{Key: "periodOfReport", Value: bson.D{{Key: "$gte", Value: todayString}}}, filterOne, filterTwo}
 	opts := options.Find().SetLimit(limitInt).SetSkip(offsetInt).SetSort(bson.D{{Key: "netTotal", Value: -1}})
 
-	deltaForms, err := utils.DeltaFormFetch(filter, opts)
+	deltaForms, err := lib.DeltaFormFetch(filter, opts)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 	}
 
-	c.JSON(http.StatusOK, deltaForms)
+	return c.JSON(deltaForms)
 }

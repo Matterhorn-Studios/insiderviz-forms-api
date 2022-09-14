@@ -1,4 +1,4 @@
-package utils
+package lib
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -18,7 +18,7 @@ func UpdateStockData(cik string) (iv_models.DB_Issuer_Doc, error) {
 	var issuer iv_models.DB_Issuer_Doc
 
 	// get the current issuer info
-	issuerCollection := database.GetCollection("Issuer")
+	issuerCollection := v1_database.GetCollection("Issuer")
 	filter := bson.D{{Key: "cik", Value: cik}}
 
 	issuerInfo := issuerCollection.FindOne(context.TODO(), filter)

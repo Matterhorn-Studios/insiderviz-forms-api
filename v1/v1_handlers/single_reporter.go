@@ -1,22 +1,21 @@
-package single
+package v1_handlers
 
 import (
 	"context"
 	"math/rand"
-	"net/http"
 	"sort"
 	"strconv"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func LatestThirteenF(c *gin.Context) {
-	cik := c.Param("cik")
+func LatestThirteenF(c *fiber.Ctx) error {
+	cik := c.Params("cik")
 
 	rawOffset := c.Query("offset")
 	offset := 0
@@ -24,12 +23,11 @@ func LatestThirteenF(c *gin.Context) {
 		var err error
 		offset, err = strconv.Atoi(rawOffset)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 		}
 	}
 
-	thirteenFCollection := database.GetCollection("13F")
+	thirteenFCollection := v1_database.GetCollection("13F")
 
 	filter := bson.D{{Key: "cik", Value: cik}}
 	opts := options.FindOne().SetSort(bson.D{{Key: "periodOfReport", Value: -1}}).SetSkip(int64(offset))
@@ -38,13 +36,11 @@ func LatestThirteenF(c *gin.Context) {
 
 	var thirteenF iv_models.DB_Form13F_Base
 	if form.Err() != nil {
-		c.JSON(http.StatusOK, gin.H{"status": "empty", "form": iv_models.DB_Form13F_Base{}})
-		return
+		return c.JSON(fiber.Map{"status": "empty", "form": iv_models.DB_Form13F_Base{}})
 	} else {
 		err := form.Decode(&thirteenF)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 		} else {
 			// update the document so that only 40 companies show up
 			if len(thirteenF.Holdings) > 40 {
@@ -70,14 +66,14 @@ func LatestThirteenF(c *gin.Context) {
 				})
 			}
 
-			c.JSON(http.StatusOK, gin.H{"status": "ok", "form": thirteenF})
+			return c.JSON(fiber.Map{"status": "ok", "form": thirteenF})
 		}
 	}
 
 }
 
-func Reporter(c *gin.Context) {
-	cik := c.Param("cik")
+func Reporter(c *fiber.Ctx) error {
+	cik := c.Params("cik")
 
 	filter := bson.D{{Key: "reporters.reporterCik", Value: cik}, {
 		Key: "$or", Value: bson.A{
@@ -87,36 +83,34 @@ func Reporter(c *gin.Context) {
 	}}
 	opts := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
 
-	deltaForms, err := utils.DeltaFormFetch(filter, opts)
+	deltaForms, err := lib.DeltaFormFetch(filter, opts)
 
 	if err != nil {
 		deltaForms = []iv_models.DB_DeltaForm{}
 	}
 
 	// get the reporter's information
-	reporterCollection := database.GetCollection("Reporter")
+	reporterCollection := v1_database.GetCollection("Reporter")
 	filter = bson.D{{Key: "cik", Value: cik}}
 
 	issuerInfo := reporterCollection.FindOne(context.TODO(), filter)
 
 	if issuerInfo.Err() != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": issuerInfo.Err().Error()})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": issuerInfo.Err()})
 	}
 
 	// unmarshal the reporter info
 	var reporter bson.M
 	if err = issuerInfo.Decode(&reporter); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 	}
 
-	c.JSON(http.StatusOK, gin.H{"forms": deltaForms, "info": reporter})
+	return c.JSON(fiber.Map{"forms": deltaForms, "info": reporter})
 }
 
-func RandomReporter(c *gin.Context) {
+func RandomReporter(c *fiber.Ctx) error {
 	// get the reporter collection
-	reporterCollection := database.GetCollection("Reporter")
+	reporterCollection := v1_database.GetCollection("Reporter")
 	var reporter iv_models.DB_Reporter_Doc
 
 	for {
@@ -132,11 +126,10 @@ func RandomReporter(c *gin.Context) {
 				// check the reporter has forms
 				filter := bson.D{{Key: "reporters.reporterCik", Value: reporter.Cik}}
 				opts2 := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}}).SetLimit(1)
-				deltaForms, err := utils.DeltaFormFetch(filter, opts2)
+				deltaForms, err := lib.DeltaFormFetch(filter, opts2)
 				if err == nil {
 					if len(deltaForms) > 0 && deltaForms[0].PeriodOfReport > "2021-01-01" {
-						c.JSON(http.StatusOK, reporter)
-						return
+						return c.JSON(reporter)
 					}
 				}
 			}

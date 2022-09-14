@@ -1,4 +1,4 @@
-package database
+package v1_database
 
 import (
 	"context"
@@ -11,6 +11,10 @@ import (
 )
 
 var db *mongo.Database
+
+func GetCollection(name string) *mongo.Collection {
+	return db.Collection(name)
+}
 
 func InitDb() error {
 	// generate client

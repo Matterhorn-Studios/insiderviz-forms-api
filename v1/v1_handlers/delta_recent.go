@@ -1,16 +1,15 @@
-package delta
+package v1_handlers
 
 import (
-	"net/http"
 	"strconv"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/utils"
-	"github.com/gin-gonic/gin"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func Recent(c *gin.Context) {
+func Recent(c *fiber.Ctx) error {
 	// get the params
 	buySellOrBoth := c.Query("buySellOrBoth")
 	insiderCongressOrBoth := c.Query("insiderCongressOrBoth")
@@ -48,13 +47,12 @@ func Recent(c *gin.Context) {
 	filter := bson.D{filterOne, filterTwo}
 	opts := options.Find().SetLimit(limitInt).SetSkip(offsetInt).SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
 
-	deltaForms, err := utils.DeltaFormFetch(filter, opts)
+	deltaForms, err := lib.DeltaFormFetch(filter, opts)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error1": err.Error()})
-		return
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
 	}
 
-	c.JSON(http.StatusOK, deltaForms)
+	return c.JSON(deltaForms)
 
 }

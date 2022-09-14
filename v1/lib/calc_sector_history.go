@@ -1,9 +1,9 @@
-package utils
+package lib
 
 import (
 	"context"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
 	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -105,7 +105,7 @@ func CalcSectorHistory(startDate string) ([]iv_models.DB_Sector, error) {
 		}},
 	}
 
-	cursor, err := database.GetCollection("DeltaForm").Aggregate(context.TODO(),
+	cursor, err := v1_database.GetCollection("DeltaForm").Aggregate(context.TODO(),
 		mongo.Pipeline{
 			matchStage,
 			projectStage,

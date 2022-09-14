@@ -1,23 +1,21 @@
-package search
+package v1_handlers
 
 import (
 	"context"
-	"net/http"
 	"sync"
 
-	"github.com/Matterhorn-Studios/insiderviz-forms-api/database"
-	"github.com/gin-gonic/gin"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
+	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func Search(c *gin.Context) {
+func Search(c *fiber.Ctx) error {
 	// get the query
 	query := c.Query("query")
 
 	if query == "" {
-		c.JSON(http.StatusOK, make([]string, 0))
-		return
+		return c.JSON(fiber.Map{})
 	}
 
 	var wg sync.WaitGroup
@@ -29,23 +27,17 @@ func Search(c *gin.Context) {
 	go func() {
 		defer wg.Done()
 		issuers, err = searchIssuer(query)
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
 	}()
 	go func() {
 		defer wg.Done()
 		reporters, err = searchReporter(query)
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
 	}()
 
 	wg.Wait()
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
+	}
 
 	sendItems := make([]SearchSend, 0)
 
@@ -79,7 +71,7 @@ func Search(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, sendItems)
+	return c.JSON(sendItems)
 }
 
 type SearchSend struct {
@@ -125,7 +117,7 @@ func searchIssuer(query string) ([]IssuerRes, error) {
 
 	limitFilter := bson.D{{Key: "$limit", Value: 10}}
 
-	cursor, err := database.GetCollection("Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
+	cursor, err := v1_database.GetCollection("Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
 	var issuers []IssuerRes
 	if err != nil {
 		return issuers, err
@@ -169,7 +161,7 @@ func searchReporter(query string) ([]ReporterRes, error) {
 
 	limitFilter := bson.D{{Key: "$limit", Value: 10}}
 
-	cursor, err := database.GetCollection("Reporter").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
+	cursor, err := v1_database.GetCollection("Reporter").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
 	var reporters []ReporterRes
 	if err != nil {
 		return reporters, err
