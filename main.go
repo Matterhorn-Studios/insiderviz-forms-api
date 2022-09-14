@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// start server
-	if err := app.Listen(":" + port); err != nil {
+	if err := app.Listen("0.0.0.0:" + port); err != nil {
 		panic(err)
 	}
 }
