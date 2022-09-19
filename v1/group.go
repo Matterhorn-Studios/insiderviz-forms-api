@@ -55,5 +55,12 @@ func AddV1Group(app *fiber.App) error {
 		s_g.Get("/reporter/holdings/:cik", v1_handlers.LatestThirteenF)
 	}
 
+	// email
+	e_g := v1.Group("/email")
+	{
+		e_g.Get("/issuer/:cik/:date", v1_handlers.EmailFormIssuer)
+		e_g.Get("/reporter/:cik/:date", v1_handlers.EmailFormReporter)
+	}
+
 	return nil
 }
