@@ -6,6 +6,7 @@ import (
 	v1 "github.com/Matterhorn-Studios/insiderviz-forms-api/v1"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/joho/godotenv"
 )
 
@@ -19,6 +20,8 @@ func main() {
 
 	// create app
 	app := fiber.New()
+
+	app.Use(recover.New())
 
 	// setup logger
 	app.Use(logger.New(logger.Config{
