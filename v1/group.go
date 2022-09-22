@@ -65,7 +65,8 @@ func AddV1Group(app *fiber.App) error {
 	// csv
 	c_g := v1.Group("/csv")
 	{
-		c_g.Get("/delta/:cik", v1_handlers.DeltaFromCsv)
+		c_g.Get("/delta/issuer/:cik", v1_handlers.DeltaFormCsvIssuer)
+		c_g.Get("/delta/reporter/:cik", v1_handlers.DeltaFormCsvReporter)
 	}
 
 	return nil
