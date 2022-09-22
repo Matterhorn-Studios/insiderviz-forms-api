@@ -62,5 +62,11 @@ func AddV1Group(app *fiber.App) error {
 		e_g.Get("/reporter/:cik/:date", v1_handlers.EmailFormReporter)
 	}
 
+	// csv
+	c_g := v1.Group("/csv")
+	{
+		c_g.Get("/delta/:cik", v1_handlers.DeltaFromCsv)
+	}
+
 	return nil
 }
