@@ -16,7 +16,7 @@ func AddV1Group(app *fiber.App) error {
 	// create the group
 	v1 := app.Group("/v1")
 
-	// no auth check
+	// un-auth check
 	v1.Get("/ping", v1_handlers.Ping)
 
 	// auth check
