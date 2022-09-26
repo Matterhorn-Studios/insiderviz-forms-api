@@ -10,13 +10,17 @@ import (
 )
 
 type DeltaCsv struct {
-	AccessionNumber       string  `csv:"accession_number"`
-	FormClass             string  `csv:"form_class"`
 	Date                  string  `csv:"date"`
+	FormClass             string  `csv:"form_class"`
 	Price                 float64 `csv:"price"`
 	Shares                float64 `csv:"shares"`
 	Total                 float64 `csv:"total"`
 	PostTransactionShares float64 `csv:"post_transaction_shares"`
+	IssuerName            string  `csv:"issuer_name"`
+	IssuerTicker          string  `csv:"issuer_ticker"`
+	ReporterName          string  `csv:"reporter_name"`
+	ReporterTitle         string  `csv:"reporter_title"`
+	Link                  string  `csv:"link"`
 }
 
 func DeltaFormCsvReporter(c *fiber.Ctx) error {
@@ -39,13 +43,17 @@ func DeltaFormCsvReporter(c *fiber.Ctx) error {
 
 	for i, form := range formList {
 		csvList[i] = DeltaCsv{
-			AccessionNumber:       form.AccessionNumber,
 			FormClass:             form.FormClass,
 			Date:                  form.PeriodOfReport,
 			Price:                 float64(form.AveragePricePerShare),
 			Shares:                float64(form.SharesTraded),
 			Total:                 float64(form.NetTotal),
 			PostTransactionShares: float64(form.PostTransactionShares),
+			IssuerName:            form.Issuer.IssuerName,
+			IssuerTicker:          form.Issuer.IssuerTicker,
+			ReporterName:          form.Reporters[0].ReporterName,
+			ReporterTitle:         form.Reporters[0].ReporterTitle,
+			Link:                  form.Url,
 		}
 
 		if form.BuyOrSell == "Sell" {
@@ -81,13 +89,17 @@ func DeltaFormCsvIssuer(c *fiber.Ctx) error {
 
 	for i, form := range formList {
 		csvList[i] = DeltaCsv{
-			AccessionNumber:       form.AccessionNumber,
 			FormClass:             form.FormClass,
 			Date:                  form.PeriodOfReport,
 			Price:                 float64(form.AveragePricePerShare),
 			Shares:                float64(form.SharesTraded),
 			Total:                 float64(form.NetTotal),
 			PostTransactionShares: float64(form.PostTransactionShares),
+			IssuerName:            form.Issuer.IssuerName,
+			IssuerTicker:          form.Issuer.IssuerTicker,
+			ReporterName:          form.Reporters[0].ReporterName,
+			ReporterTitle:         form.Reporters[0].ReporterTitle,
+			Link:                  form.Url,
 		}
 
 		if form.BuyOrSell == "Sell" {

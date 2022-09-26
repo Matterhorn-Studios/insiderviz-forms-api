@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/Matterhorn-Studios/insidervizforms v1.0.9
+	github.com/gocarina/gocsv v0.0.0-20220914091333-ceebdd90b590
 	github.com/gofiber/fiber/v2 v2.37.1
 	github.com/joho/godotenv v1.4.0
 	go.mongodb.org/mongo-driver v1.10.2
@@ -16,7 +17,6 @@ require (
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/gocarina/gocsv v0.0.0-20220914091333-ceebdd90b590 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/montanaflynn/stats v0.6.6 // indirect
