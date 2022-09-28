@@ -31,9 +31,20 @@ func Issuer(c *fiber.Ctx) error {
 	go func() {
 		defer wg.Done()
 		var err error
-		deltaForms, err = lib.DeltaFormFetch(filter, opts)
-		if err != nil {
-			deltaForms = []iv_models.DB_DeltaForm{}
+
+		session, err := v1_database.GetNewSession()
+		if err == nil {
+			defer session.EndSession(context.Background())
+
+			collection := session.Client().Database("insiderviz").Collection("DeltaForm")
+
+			var forms []iv_models.DB_DeltaForm
+			cur, err := collection.Find(context.Background(), filter, opts)
+			if err == nil {
+				if err = cur.All(context.Background(), &forms); err == nil {
+					deltaForms = forms
+				}
+			}
 		}
 	}()
 
