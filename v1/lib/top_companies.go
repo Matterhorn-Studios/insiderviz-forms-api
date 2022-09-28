@@ -66,8 +66,18 @@ func MostBought(startDate string, formClass string) ([]bson.M, error) {
 	// limit
 	limitStage := bson.D{{Key: "$limit", Value: 10}}
 
+	// get db
+	session, err := v1_database.GetNewSession()
+	if err != nil {
+		return nil, err
+	}
+
+	defer session.EndSession(context.Background())
+
+	collection := session.Client().Database("insiderviz").Collection("DeltaForm")
+
 	// run the aggregate on delta form
-	cursor, err := v1_database.GetCollection("DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState, limitStage})
+	cursor, err := collection.Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState, limitStage})
 	if err != nil {
 		return results, err
 	}
@@ -137,8 +147,18 @@ func MostSold(startDate string, formClass string) ([]bson.M, error) {
 	// limit
 	limitStage := bson.D{{Key: "$limit", Value: 10}}
 
+	// get db
+	session, err := v1_database.GetNewSession()
+	if err != nil {
+		return nil, err
+	}
+
+	defer session.EndSession(context.Background())
+
+	collection := session.Client().Database("insiderviz").Collection("DeltaForm")
+
 	// run the aggregate on delta form
-	cursor, err := v1_database.GetCollection("DeltaForm").Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState, limitStage})
+	cursor, err := collection.Aggregate(context.TODO(), mongo.Pipeline{matchStage, projectStage, groupStage, orderState, limitStage})
 	if err != nil {
 		return results, err
 	}
