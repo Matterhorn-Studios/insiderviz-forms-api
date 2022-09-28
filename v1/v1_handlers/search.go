@@ -117,7 +117,16 @@ func searchIssuer(query string, limit int) ([]IssuerRes, error) {
 
 	limitFilter := bson.D{{Key: "$limit", Value: limit}}
 
-	cursor, err := v1_database.GetCollection("Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
+	session, err := v1_database.GetNewSession()
+	if err != nil {
+		return nil, err
+	}
+	defer session.EndSession(context.Background())
+
+	// get the collection
+	collection := session.Client().Database("insiderviz").Collection("Issuer")
+
+	cursor, err := collection.Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
 	var issuers []IssuerRes
 	if err != nil {
 		return issuers, err
@@ -161,7 +170,16 @@ func searchReporter(query string, limit int) ([]ReporterRes, error) {
 
 	limitFilter := bson.D{{Key: "$limit", Value: limit}}
 
-	cursor, err := v1_database.GetCollection("Reporter").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
+	session, err := v1_database.GetNewSession()
+	if err != nil {
+		return nil, err
+	}
+
+	defer session.EndSession(context.Background())
+
+	collection := session.Client().Database("insiderviz").Collection("Reporter")
+
+	cursor, err := collection.Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
 	var reporters []ReporterRes
 	if err != nil {
 		return reporters, err
