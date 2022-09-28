@@ -11,14 +11,20 @@ import (
 )
 
 var db *mongo.Database
+var client *mongo.Client
 
 func GetCollection(name string) *mongo.Collection {
 	return db.Collection(name)
 }
 
+func GetNewSession() (mongo.Session, error) {
+	return client.StartSession()
+}
+
 func InitDb() error {
 	// generate client
-	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGODB_URI")))
+	var err error
+	client, err = mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGODB_URI")))
 	if err != nil {
 		return err
 	}

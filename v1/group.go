@@ -69,5 +69,11 @@ func AddV1Group(app *fiber.App) error {
 		c_g.Get("/delta/reporter/:cik", v1_handlers.DeltaFormCsvReporter)
 	}
 
+	// config
+	f_g := v1.Group("/config")
+	{
+		f_g.Get("/search/issuer", v1_handlers.SearchConfigIssuer)
+	}
+
 	return nil
 }

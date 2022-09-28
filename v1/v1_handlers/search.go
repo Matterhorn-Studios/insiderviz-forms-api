@@ -26,7 +26,7 @@ func Search(c *fiber.Ctx) error {
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		issuers, err = searchIssuer(query)
+		issuers, err = searchIssuer(query, 10)
 	}()
 	go func() {
 		defer wg.Done()
@@ -82,7 +82,7 @@ type SearchSend struct {
 	Tickers       []string `json:"tickers"`
 }
 
-func searchIssuer(query string) ([]IssuerRes, error) {
+func searchIssuer(query string, limit int) ([]IssuerRes, error) {
 	projectStage := bson.D{
 		{Key: "$project", Value: bson.D{
 			{
@@ -115,7 +115,7 @@ func searchIssuer(query string) ([]IssuerRes, error) {
 		}},
 	}}}
 
-	limitFilter := bson.D{{Key: "$limit", Value: 10}}
+	limitFilter := bson.D{{Key: "$limit", Value: limit}}
 
 	cursor, err := v1_database.GetCollection("Issuer").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
 	var issuers []IssuerRes
