@@ -73,6 +73,7 @@ func AddV1Group(app *fiber.App) error {
 	f_g := v1.Group("/config")
 	{
 		f_g.Get("/search/issuer", v1_handlers.SearchConfigIssuer)
+		f_g.Get("/search/reporter", v1_handlers.SearchConfigReporter)
 	}
 
 	return nil

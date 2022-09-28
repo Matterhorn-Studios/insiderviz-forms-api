@@ -30,7 +30,7 @@ func Search(c *fiber.Ctx) error {
 	}()
 	go func() {
 		defer wg.Done()
-		reporters, err = searchReporter(query)
+		reporters, err = searchReporter(query, 10)
 	}()
 
 	wg.Wait()
@@ -129,7 +129,7 @@ func searchIssuer(query string, limit int) ([]IssuerRes, error) {
 	return issuers, nil
 }
 
-func searchReporter(query string) ([]ReporterRes, error) {
+func searchReporter(query string, limit int) ([]ReporterRes, error) {
 	projectStage := bson.D{
 		{Key: "$project", Value: bson.D{
 			{
@@ -159,7 +159,7 @@ func searchReporter(query string) ([]ReporterRes, error) {
 		}},
 	}}}
 
-	limitFilter := bson.D{{Key: "$limit", Value: 10}}
+	limitFilter := bson.D{{Key: "$limit", Value: limit}}
 
 	cursor, err := v1_database.GetCollection("Reporter").Aggregate(context.TODO(), mongo.Pipeline{searchFilter, limitFilter, projectStage})
 	var reporters []ReporterRes
