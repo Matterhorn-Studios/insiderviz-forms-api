@@ -22,7 +22,8 @@ func SearchConfigReporter(c *fiber.Ctx) error {
 	query := c.Query("query")
 
 	if query == "" {
-		return c.JSON(fiber.Map{})
+		empty := make([]SendConfigReporter, 0)
+		return c.JSON(empty)
 	}
 
 	reporters, err := searchReporter(query, 5)
@@ -120,7 +121,8 @@ func SearchConfigIssuer(c *fiber.Ctx) error {
 	query := c.Query("query")
 
 	if query == "" {
-		return c.JSON(fiber.Map{})
+		empty := make([]SendConfigIssuer, 0)
+		return c.JSON(empty)
 	}
 
 	issuers, err := searchIssuer(query, 5)
