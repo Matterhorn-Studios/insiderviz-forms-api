@@ -3,7 +3,7 @@ module github.com/Matterhorn-Studios/insiderviz-forms-api
 go 1.19
 
 require (
-	github.com/Matterhorn-Studios/insidervizforms v1.0.9
+	github.com/Matterhorn-Studios/insidervizforms v1.1.1
 	github.com/gocarina/gocsv v0.0.0-20220914091333-ceebdd90b590
 	github.com/gofiber/fiber/v2 v2.37.1
 	github.com/joho/godotenv v1.4.0

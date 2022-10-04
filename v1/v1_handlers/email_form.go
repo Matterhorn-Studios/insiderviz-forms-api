@@ -11,7 +11,7 @@ func EmailFormIssuer(c *fiber.Ctx) error {
 	cik := c.Params("cik")
 	date := c.Params("date")
 
-	filter := bson.D{{Key: "issuer.issuerCik", Value: cik}, {Key: "periodOfReport", Value: date}}
+	filter := bson.D{{Key: "issuer.issuerCik", Value: cik}, {Key: "dateAdded", Value: date}}
 	opts := options.Find()
 
 	forms, err := lib.DeltaFormFetch(filter, opts)
@@ -27,7 +27,7 @@ func EmailFormReporter(c *fiber.Ctx) error {
 	cik := c.Params("cik")
 	date := c.Params("date")
 
-	filter := bson.D{{Key: "reporters.reporterCik", Value: bson.D{{Key: "$all", Value: bson.A{cik}}}}, {Key: "periodOfReport", Value: date}}
+	filter := bson.D{{Key: "reporters.reporterCik", Value: bson.D{{Key: "$all", Value: bson.A{cik}}}}, {Key: "dateAdded", Value: date}}
 	opts := options.Find()
 
 	forms, err := lib.DeltaFormFetch(filter, opts)
