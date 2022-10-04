@@ -11,7 +11,7 @@ func DeltasFromOneDayIssuer(c *fiber.Ctx) error {
 	cik := c.Query("cik")
 	date := c.Query("date")
 
-	filter := bson.D{{Key: "issuer.issuerCik", Value: cik}, {Key: "periodOfReport", Value: date}}
+	filter := bson.D{{Key: "issuer.issuerCik", Value: cik}, {Key: "dateAdded", Value: date}}
 
 	cur, err := v1_database.GetCollection("DeltaForm").Find(c.Context(), filter)
 	if err != nil {
@@ -31,7 +31,7 @@ func DeltasFromOneDayReporter(c *fiber.Ctx) error {
 	cik := c.Query("cik")
 	date := c.Query("date")
 
-	filter := bson.D{{Key: "reporters.reporterCik", Value: cik}, {Key: "periodOfReport", Value: date}}
+	filter := bson.D{{Key: "reporters.reporterCik", Value: cik}, {Key: "dateAdded", Value: date}}
 
 	cur, err := v1_database.GetCollection("DeltaForm").Find(c.Context(), filter)
 	if err != nil {
