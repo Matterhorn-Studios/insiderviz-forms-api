@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
-	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -106,7 +106,7 @@ func DeepFilter(c *fiber.Ctx) error {
 
 }
 
-func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateStart string, dateEnd string, formClass []string, netTotalMin float64, netTotalMax float64, sharesMin float64, sharesMax float64, sharePriceMin float64, sharePriceMax float64, take int64, skip int64) ([]iv_models.DB_DeltaForm, error) {
+func HandleDeepFilter(sortBy string, order string, buyOrSellOrBoth string, dateStart string, dateEnd string, formClass []string, netTotalMin float64, netTotalMax float64, sharesMin float64, sharesMax float64, sharePriceMin float64, sharePriceMax float64, take int64, skip int64) ([]models.DB_DeltaForm, error) {
 
 	buyOrSellFilter := bson.E{}
 	if buyOrSellOrBoth == "Buy" {

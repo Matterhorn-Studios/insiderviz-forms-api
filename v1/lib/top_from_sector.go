@@ -3,15 +3,15 @@ package lib
 import (
 	"context"
 
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
-	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func TopFromSector(startDate string, sector string) (iv_models.Top_From_Sector, error) {
-	var result iv_models.Top_From_Sector
-	var aggResult []iv_models.Top_From_Sector_Entry
+func TopFromSector(startDate string, sector string) (models.Top_From_Sector, error) {
+	var result models.Top_From_Sector
+	var aggResult []models.Top_From_Sector_Entry
 
 	matchStage := bson.D{
 		{Key: "$match", Value: bson.D{

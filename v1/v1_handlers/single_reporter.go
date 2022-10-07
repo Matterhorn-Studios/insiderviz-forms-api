@@ -7,8 +7,8 @@ import (
 	"strconv"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
-	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -34,9 +34,9 @@ func LatestThirteenF(c *fiber.Ctx) error {
 
 	form := thirteenFCollection.FindOne(context.TODO(), filter, opts)
 
-	var thirteenF iv_models.DB_Form13F_Base
+	var thirteenF models.DB_Form13F_Base
 	if form.Err() != nil {
-		return c.JSON(fiber.Map{"status": "empty", "form": iv_models.DB_Form13F_Base{}})
+		return c.JSON(fiber.Map{"status": "empty", "form": models.DB_Form13F_Base{}})
 	} else {
 		err := form.Decode(&thirteenF)
 		if err != nil {
@@ -58,7 +58,7 @@ func LatestThirteenF(c *fiber.Ctx) error {
 				}
 
 				thirteenF.Holdings = thirteenF.Holdings[:40]
-				thirteenF.Holdings = append(thirteenF.Holdings, iv_models.DB_Form13F_Holding{
+				thirteenF.Holdings = append(thirteenF.Holdings, models.DB_Form13F_Holding{
 					Name:     "Other",
 					NetTotal: float32(otherTotal),
 					Shares:   float32(otherShares),
@@ -86,7 +86,7 @@ func Reporter(c *fiber.Ctx) error {
 	deltaForms, err := lib.DeltaFormFetch(filter, opts)
 
 	if err != nil {
-		deltaForms = []iv_models.DB_DeltaForm{}
+		deltaForms = []models.DB_DeltaForm{}
 	}
 
 	// get the reporter's information
@@ -111,7 +111,7 @@ func Reporter(c *fiber.Ctx) error {
 func RandomReporter(c *fiber.Ctx) error {
 	// get the reporter collection
 	reporterCollection := v1_database.GetCollection("Reporter")
-	var reporter iv_models.DB_Reporter_Doc
+	var reporter models.DB_Reporter_Doc
 
 	for {
 		// get a random offset 1-5000

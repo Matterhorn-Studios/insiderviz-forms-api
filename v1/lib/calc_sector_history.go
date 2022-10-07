@@ -3,14 +3,14 @@ package lib
 import (
 	"context"
 
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
-	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CalcSectorHistory(startDate string) ([]iv_models.DB_Sector, error) {
-	var results []iv_models.DB_Sector
+func CalcSectorHistory(startDate string) ([]models.DB_Sector, error) {
+	var results []models.DB_Sector
 
 	// setup the aggregate pipeline
 	matchStage := bson.D{

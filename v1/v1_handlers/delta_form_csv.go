@@ -1,8 +1,8 @@
 package v1_handlers
 
 import (
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
-	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"github.com/gocarina/gocsv"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,7 +34,7 @@ func DeltaFormCsvReporter(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err})
 	}
 
-	var formList []iv_models.DB_DeltaForm
+	var formList []models.DB_DeltaForm
 	if err := cur.All(c.Context(), &formList); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err})
 	}
@@ -80,7 +80,7 @@ func DeltaFormCsvIssuer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err})
 	}
 
-	var formList []iv_models.DB_DeltaForm
+	var formList []models.DB_DeltaForm
 	if err := cur.All(c.Context(), &formList); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err})
 	}

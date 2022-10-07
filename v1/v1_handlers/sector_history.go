@@ -2,7 +2,7 @@ package v1_handlers
 
 import (
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
-	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -24,7 +24,7 @@ func SectorHistory(c *fiber.Ctx) error {
 	return c.JSON(sendData)
 }
 
-func addSectorToData(data *[]SectorHistoryData, sector iv_models.DB_Sector) {
+func addSectorToData(data *[]SectorHistoryData, sector models.DB_Sector) {
 	// ASSUME data IS IN ORDER
 	for _, histItem := range sector.HistoricalData {
 		found := false

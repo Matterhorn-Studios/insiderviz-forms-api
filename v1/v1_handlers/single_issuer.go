@@ -6,8 +6,8 @@ import (
 	"sync"
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
-	"github.com/Matterhorn-Studios/insidervizforms/iv_models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,7 +26,7 @@ func Issuer(c *fiber.Ctx) error {
 	opts := options.Find().SetSort(bson.D{{Key: "periodOfReport", Value: -1}})
 
 	var wg sync.WaitGroup
-	var deltaForms []iv_models.DB_DeltaForm
+	var deltaForms []models.DB_DeltaForm
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
@@ -38,7 +38,7 @@ func Issuer(c *fiber.Ctx) error {
 
 			collection := session.Client().Database("insiderviz").Collection("DeltaForm")
 
-			var forms []iv_models.DB_DeltaForm
+			var forms []models.DB_DeltaForm
 			cur, err := collection.Find(context.Background(), filter, opts)
 			if err == nil {
 				if err = cur.All(context.Background(), &forms); err == nil {
@@ -48,7 +48,7 @@ func Issuer(c *fiber.Ctx) error {
 		}
 	}()
 
-	var issuer iv_models.DB_Issuer_Doc
+	var issuer models.DB_Issuer_Doc
 	var err error
 	go func() {
 		defer wg.Done()
@@ -85,7 +85,7 @@ func Issuer(c *fiber.Ctx) error {
 func RandomIssuer(c *fiber.Ctx) error {
 	// get the issuer collection
 	issuerCollection := v1_database.GetCollection("Issuer")
-	var issuer iv_models.DB_Issuer_Doc
+	var issuer models.DB_Issuer_Doc
 
 	for {
 		// get a random offset 1-5000
