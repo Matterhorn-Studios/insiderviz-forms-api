@@ -78,5 +78,11 @@ func AddV1Group(app *fiber.App) error {
 		f_g.Get("/search/reporter", v1_handlers.SearchConfigReporter)
 	}
 
+	// internal
+	i_g := v1.Group("/internal")
+	{
+		i_g.Get("/form4", v1_handlers.InternalForm4)
+	}
+
 	return nil
 }
