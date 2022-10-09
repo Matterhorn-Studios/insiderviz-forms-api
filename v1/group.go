@@ -44,6 +44,7 @@ func AddV1Group(app *fiber.App) error {
 		d_g.Get("/deepFilter", v1_handlers.DeepFilter)
 		d_g.Get("/oneDay/issuer", v1_handlers.DeltasFromOneDayIssuer)
 		d_g.Get("/oneDay/reporter", v1_handlers.DeltasFromOneDayReporter)
+		d_g.Get("highlights", v1_handlers.DailyHighlights)
 	}
 
 	// single
