@@ -43,7 +43,7 @@ func AddV1Group(app *fiber.App) error {
 		d_g.Get("/recent", v1_handlers.Recent)
 		d_g.Get("/deepFilter", v1_handlers.DeepFilter)
 		d_g.Get("/oneDay/issuer", v1_handlers.DeltasFromOneDayIssuer)
-		d_g.Get("/oneDay/reporter", v1_handlers.DeltaFormCsvReporter)
+		d_g.Get("/oneDay/reporter", v1_handlers.DeltasFromOneDayReporter)
 	}
 
 	// single
@@ -55,13 +55,6 @@ func AddV1Group(app *fiber.App) error {
 		s_g.Get("/reporter/random", v1_handlers.RandomReporter)
 		s_g.Get("/reporter/:cik", v1_handlers.Reporter)
 		s_g.Get("/reporter/holdings/:cik", v1_handlers.LatestThirteenF)
-	}
-
-	// email
-	e_g := v1.Group("/email")
-	{
-		e_g.Get("/issuer/:cik/:date", v1_handlers.EmailFormIssuer)
-		e_g.Get("/reporter/:cik/:date", v1_handlers.EmailFormReporter)
 	}
 
 	// csv

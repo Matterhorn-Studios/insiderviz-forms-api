@@ -10,18 +10,37 @@ import (
 func DeltasFromOneDayIssuer(c *fiber.Ctx) error {
 	cik := c.Query("cik")
 	date := c.Query("date")
-	insiderBuys := c.Query("insiderBuys")
-	insiderSells := c.Query("insiderSells")
-	congressBuys := c.Query("congressBuys")
-	congressSells := c.Query("congressSells")
+	insiderBuysStr := c.Query("insiderBuys")
+	insiderSellsStr := c.Query("insiderSells")
+	congressBuysStr := c.Query("congressBuys")
+	congressSellsStr := c.Query("congressSells")
 
-	// TODO: Add filter for insiderBuys, insiderSells, congressBuys, congressSells
+	insiderBuys := insiderBuysStr == "true"
+	insiderSells := insiderSellsStr == "true"
+	congressBuys := congressBuysStr == "true"
+	congressSells := congressSellsStr == "true"
+
+	orEmailInfo := bson.A{}
+	if insiderBuys {
+		orEmailInfo = append(orEmailInfo, bson.M{"issuerEmailInfo.insiderBuys": true})
+	}
+	if insiderSells {
+		orEmailInfo = append(orEmailInfo, bson.M{"issuerEmailInfo.insiderSells": true})
+	}
+	if congressBuys {
+		orEmailInfo = append(orEmailInfo, bson.M{"issuerEmailInfo.congressBuys": true})
+	}
+	if congressSells {
+		orEmailInfo = append(orEmailInfo, bson.M{"issuerEmailInfo.congressSells": true})
+	}
+
+	if len(orEmailInfo) == 0 {
+		orEmailInfo = append(orEmailInfo, bson.M{"issuerEmailInfo.noReal": true})
+	}
 
 	filter := bson.D{{Key: "issuer.issuerCik", Value: cik}, {Key: "dateAdded", Value: date},
-		{Key: "issuerEmailInfo.insiderBuys", Value: insiderBuys},
-		{Key: "issuerEmailInfo.insiderSells", Value: insiderSells},
-		{Key: "issuerEmailInfo.congressBuys", Value: congressBuys},
-		{Key: "issuerEmailInfo.congressSells", Value: congressSells}}
+		{Key: "$or", Value: orEmailInfo},
+	}
 
 	cur, err := v1_database.GetCollection("DeltaForm").Find(c.Context(), filter)
 	if err != nil {
@@ -43,7 +62,20 @@ func DeltasFromOneDayReporter(c *fiber.Ctx) error {
 	onBuy := c.Query("onBuy")
 	onSell := c.Query("onSell")
 
-	filter := bson.D{{Key: "reporters.reporterCik", Value: cik}, {Key: "dateAdded", Value: date}, {Key: "buyOrSell", Value: onBuy}, {Key: "buyOrSell", Value: onSell}}
+	buyOrSellArray := bson.A{}
+	if onBuy == "true" {
+		buyOrSellArray = append(buyOrSellArray, "Buy")
+	}
+	if onSell == "true" {
+		buyOrSellArray = append(buyOrSellArray, "Sell")
+	}
+	if len(buyOrSellArray) == 0 {
+		buyOrSellArray = append(buyOrSellArray, "NoReal")
+	}
+
+	filter := bson.D{{Key: "reporters.reporterCik", Value: cik}, {Key: "dateAdded", Value: date},
+		{Key: "buyOrSell", Value: bson.D{{Key: "$in", Value: buyOrSellArray}}},
+	}
 
 	cur, err := v1_database.GetCollection("DeltaForm").Find(c.Context(), filter)
 	if err != nil {
