@@ -11,6 +11,7 @@ type DB_DeltaForm struct {
 	BuyOrSell             string          `json:"buyOrSell" bson:"buyOrSell"`
 	Url                   string          `json:"url" bson:"url"`
 	DateAdded             string          `json:"dateAdded" bson:"dateAdded"`
+	PercentChange         int             `json:"percentChange" bson:"percentChange"`
 	Issuer                DB_Issuer       `json:"issuer" bson:"issuer"`
 	Reporters             []DB_Reporter   `json:"reporters" bson:"reporters"`
 	IssuerEmailInfo       DB_Issuer_Email `json:"issuerEmailInfo" bson:"issuerEmailInfo"`

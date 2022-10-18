@@ -5,6 +5,7 @@ import (
 
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_helpers"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -20,5 +21,9 @@ func DeltaFormFetch(filter primitive.D, opts *options.FindOptions) ([]models.DB_
 	if errParse != nil {
 		return nil, errParse
 	}
+	for i := 0; i < len(deltaForms); i++ {
+		deltaForms[i].PercentChange = v1_helpers.PercentChange(deltaForms[i])
+	}
+
 	return deltaForms, nil
 }
