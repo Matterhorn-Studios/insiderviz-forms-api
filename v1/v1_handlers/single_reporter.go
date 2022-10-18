@@ -9,6 +9,7 @@ import (
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/lib"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/models"
 	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_database"
+	"github.com/Matterhorn-Studios/insiderviz-forms-api/v1/v1_helpers"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -103,6 +104,10 @@ func Reporter(c *fiber.Ctx) error {
 	var reporter bson.M
 	if err = issuerInfo.Decode(&reporter); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err})
+	}
+
+	for i := 0; i < len(deltaForms); i++ {
+		deltaForms[i].PercentChange = v1_helpers.PercentChange(deltaForms[i])
 	}
 
 	return c.JSON(fiber.Map{"forms": deltaForms, "info": reporter})
