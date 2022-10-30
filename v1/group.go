@@ -47,6 +47,12 @@ func AddV1Group(app *fiber.App) error {
 		d_g.Get("highlights", v1_handlers.DailyHighlights)
 	}
 
+	// cluster
+	l_g := v1.Group("/cluster")
+	{
+		l_g.Get("/", v1_handlers.ClusterBuys)
+	}
+
 	// single
 	s_g := v1.Group("/single")
 	{
